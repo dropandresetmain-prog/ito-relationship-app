@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
-import { AppShell } from "@/components/AppShell";
+import { ItoPaperShell } from "@/components/ItoPaperShell";
 import { AcceptInviteForm } from "@/components/AcceptInviteForm";
+import { itoCardClass } from "@/lib/ito-ui";
 import { createClient } from "@/lib/supabase/server";
 import { getInvitePreview } from "@/lib/threads/queries";
+import { cn } from "@/lib/utils";
 
 interface InvitePageProps {
   params: Promise<{ code: string }>;
@@ -32,21 +34,20 @@ export default async function InvitePage({ params }: InvitePageProps) {
   }
 
   return (
-    <AppShell title="Accept a thread" showNav={false}>
-      <div className="flex flex-1 flex-col gap-6">
-        <div className="rounded-2xl border border-thread-100 bg-white p-5 text-center">
-          <p className="text-xs font-medium uppercase tracking-wide text-thread-600">
+    <ItoPaperShell
+      title="Accept a thread"
+      subtitle="Your thread is tied privately — not a group chat or public profile."
+      showNav={false}
+    >
+      <div className="flex flex-col gap-6">
+        <div className={cn(itoCardClass, "text-center")}>
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--thread)]">
             Invite code
           </p>
-          <p className="mt-2 text-3xl font-bold tracking-widest text-thread-700">
+          <p className="font-heading mt-2 text-3xl font-semibold tracking-widest text-foreground">
             {code.toUpperCase()}
           </p>
         </div>
-
-        <p className="text-sm text-warm-900/55">
-          Accepting will link your tree to theirs. This is not a group chat or a
-          public profile.
-        </p>
 
         <AcceptInviteForm
           code={code}
@@ -55,6 +56,6 @@ export default async function InvitePage({ params }: InvitePageProps) {
           hasProfile={hasProfile}
         />
       </div>
-    </AppShell>
+    </ItoPaperShell>
   );
 }

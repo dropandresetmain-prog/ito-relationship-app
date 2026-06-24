@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 export type AuthState = {
   error?: string;
   success?: string;
+  email?: string;
+  status?: "verification_sent" | "magic_link_sent";
 };
 
 export async function signUpWithEmail(
@@ -25,11 +27,18 @@ export async function signUpWithEmail(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({ email, password });
 
   if (error) return { error: error.message };
 
-  redirect(redirectTo || "/onboarding");
+  if (data.session) {
+    redirect(redirectTo || "/onboarding");
+  }
+
+  return {
+    status: "verification_sent",
+    email,
+  };
 }
 
 export async function signInWithEmail(
@@ -76,7 +85,9 @@ export async function signInWithMagicLink(
   if (error) return { error: error.message };
 
   return {
-    success: "Check your email for a magic link to sign in.",
+    status: "magic_link_sent",
+    email,
+    success: "Check your email for your magic link.",
   };
 }
 
