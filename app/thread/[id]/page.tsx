@@ -1,16 +1,31 @@
 import { notFound } from "next/navigation";
-import { AppShell } from "@/components/AppShell";
-import { CopyInviteLink } from "@/components/CopyInviteLink";
-import { ThreadPulseForm } from "@/components/ThreadPulseForm";
-import { RELATIONSHIP_MODE_LABELS } from "@/lib/constants";
-import { getThreadDetail } from "@/lib/threads/queries";
+import { LivingTreeScene } from "@/components/scene/LivingTreeScene";
+import { ScenePageLayout } from "@/components/scene/ScenePageLayout";
+import { mapThreadsToConnections } from "@/lib/scene/map-threads";
+import { LIVING_TREE } from "@/lib/scene/living-tree";
+import { getTimeOfDay } from "@/lib/scene/time-of-day";
+import { requireProfile } from "@/lib/auth/session";
+import { createClient } from "@/lib/supabase/server";
+import { getInboxPulses, getThreadDetail } from "@/lib/threads/queries";
 
 interface ThreadPageProps {
   params: Promise<{ id: string }>;
 }
 
+function formatRelativeTime(iso: string | null): string | null {
+  if (!iso) return null;
+  const date = new Date(iso);
+  const diffMs = Date.now() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return `${diffDays} days ago`;
+  return date.toLocaleDateString();
+}
+
 export default async function ThreadPage({ params }: ThreadPageProps) {
   const { id } = await params;
+  const { profile } = await requireProfile();
   const detail = await getThreadDetail(id);
 
   if (!detail) {
@@ -18,49 +33,51 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
   }
 
   const { thread, otherMember, displayTitle } = detail;
-  const modeLabel = RELATIONSHIP_MODE_LABELS[thread.relationship_mode];
-  const isActive = thread.status === "active";
-  const isPending = thread.status === "pending";
+  const inbox = await getInboxPulses();
+  const unreadCount = inbox.filter((item) => !item.read).length;
 
-  const reminder =
-    thread.relationship_mode === "mother_son"
-      ? "Send Mum a little warmth?"
-      : thread.relationship_mode === "clare"
-        ? "Clare crossed your mind?"
-        : "A small pulse can mean a lot.";
+  const supabase = await createClient();
+  const { data: lastPulse } = await supabase
+    .from("pulses")
+    .select("created_at")
+    .eq("thread_id", thread.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const connections = mapThreadsToConnections(
+    [
+      {
+        id: thread.id,
+        title: displayTitle,
+        relationshipMode: thread.relationship_mode,
+        lastPulseAt: formatRelativeTime(lastPulse?.created_at ?? null),
+        hasArrived: inbox.some((item) => !item.read && item.threadId === thread.id),
+      },
+    ],
+    LIVING_TREE.charmSlots
+  );
+
+  const connection = connections[0];
+  if (!connection) {
+    notFound();
+  }
+
+  const time = getTimeOfDay(profile.timezone);
 
   return (
-    <AppShell title={displayTitle} backHref="/threads" showNav={false}>
-      <div className="flex flex-col gap-6">
-        <div className="text-center">
-          <p className="text-xs font-medium text-thread-600">{modeLabel}</p>
-          {otherMember ? (
-            <p className="mt-1 text-sm text-warm-900/60">
-              Connected with {otherMember.display_name}
-            </p>
-          ) : isPending ? (
-            <p className="mt-1 text-sm text-warm-900/60">
-              Waiting for someone to accept your invite…
-            </p>
-          ) : null}
-        </div>
-
-        {isPending ? (
-          <CopyInviteLink code={thread.invite_code} />
-        ) : null}
-
-        <p className="text-center text-sm text-warm-900/60">{reminder}</p>
-
-        <ThreadPulseForm
-          threadId={thread.id}
-          disabled={!isActive}
-          disabledReason={
-            !isActive
-              ? "Send a pulse once this thread is tied with another person."
-              : undefined
-          }
-        />
-      </div>
-    </AppShell>
+    <ScenePageLayout showNav={false}>
+      <LivingTreeScene
+        connection={connection}
+        threadId={thread.id}
+        relationshipMode={thread.relationship_mode}
+        relationLabel={otherMember?.display_name ?? displayTitle}
+        status={thread.status}
+        inviteCode={thread.status === "pending" ? thread.invite_code : undefined}
+        time={time}
+        unreadCount={unreadCount}
+        isActive={thread.status === "active"}
+      />
+    </ScenePageLayout>
   );
 }

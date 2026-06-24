@@ -2,21 +2,25 @@
 
 import { useActionState, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { Mail } from "lucide-react";
 import {
   signInWithEmail,
   signInWithMagicLink,
   signUpWithEmail,
   type AuthState,
 } from "@/lib/auth/actions";
+import { cn } from "@/lib/utils";
 
-type AuthTab = "login" | "signup" | "magic";
+type AuthMode = "login" | "signup";
 
 const initialState: AuthState = {};
 
 export function AuthForm() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/";
-  const [tab, setTab] = useState<AuthTab>("login");
+  const callbackError = searchParams.get("error");
+  const [mode, setMode] = useState<AuthMode>("login");
+  const [magicOpen, setMagicOpen] = useState(false);
 
   const [loginState, loginAction, loginPending] = useActionState(
     signInWithEmail,
@@ -31,101 +35,158 @@ export function AuthForm() {
     initialState
   );
 
-  const state =
-    tab === "login" ? loginState : tab === "signup" ? signupState : magicState;
-  const pending =
-    tab === "login" ? loginPending : tab === "signup" ? signupPending : magicPending;
-  const action =
-    tab === "login" ? loginAction : tab === "signup" ? signupAction : magicAction;
+  const activeState = magicOpen ? magicState : mode === "login" ? loginState : signupState;
+  const pending = magicOpen ? magicPending : mode === "login" ? loginPending : signupPending;
+  const action = magicOpen ? magicAction : mode === "login" ? loginAction : signupAction;
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="text-center">
-        <p className="text-3xl" aria-hidden>
-          🧵
-        </p>
-        <h1 className="mt-2 text-2xl font-semibold text-warm-900">Ito</h1>
-        <p className="mt-2 text-sm text-warm-900/60">
-          Tie private threads. Send a pulse when someone crosses your mind.
-        </p>
-      </div>
+    <div className="px-5 pb-8 pt-6">
+      <div className="animate-rise-in rounded-t-[2rem] border border-border/80 bg-card/90 px-5 pb-7 pt-5 backdrop-blur-md paper-shadow">
+        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-muted-foreground/25" />
 
-      <div className="flex rounded-xl bg-warm-100 p-1">
-        {(
-          [
-            ["login", "Log in"],
-            ["signup", "Sign up"],
-            ["magic", "Magic link"],
-          ] as const
-        ).map(([key, label]) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setTab(key)}
-            className={`flex-1 rounded-lg py-2 text-xs font-medium transition ${
-              tab === key
-                ? "bg-white text-thread-700 shadow-sm"
-                : "text-warm-900/50"
-            }`}
+        <header className="mb-5 text-center">
+          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--thread)]">
+            Ito
+          </p>
+          <h1 className="font-heading mt-2 text-2xl font-semibold leading-tight text-foreground">
+            Welcome to Ito
+          </h1>
+          <p className="mt-2 text-pretty text-sm leading-relaxed text-muted-foreground">
+            Tie your threads. Send small pulses of care when someone crosses your mind.
+          </p>
+        </header>
+
+        {!magicOpen ? (
+          <div
+            className="mb-5 flex rounded-2xl border border-border bg-background/50 p-1"
+            role="tablist"
+            aria-label="Sign in or create account"
           >
-            {label}
-          </button>
-        ))}
-      </div>
+            {(
+              [
+                ["login", "Sign in"],
+                ["signup", "Create account"],
+              ] as const
+            ).map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                role="tab"
+                aria-selected={mode === key}
+                onClick={() => setMode(key)}
+                className={cn(
+                  "flex-1 rounded-xl py-2.5 text-sm font-medium transition-all",
+                  mode === key
+                    ? "bg-[var(--thread)] text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="mb-5 flex items-center justify-between">
+            <p className="font-heading text-base font-medium text-foreground">Magic link</p>
+            <button
+              type="button"
+              onClick={() => setMagicOpen(false)}
+              className="text-xs font-medium text-muted-foreground hover:text-foreground"
+            >
+              Back to password
+            </button>
+          </div>
+        )}
 
-      <form action={action} className="flex flex-col gap-4">
-        <input type="hidden" name="redirect" value={redirect} />
+        {callbackError ? (
+          <p
+            className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+            role="alert"
+          >
+            Sign-in link expired or failed. Please try again.
+          </p>
+        ) : null}
 
-        <label className="text-sm font-medium text-warm-900/80">
-          Email
-          <input
-            type="email"
-            name="email"
-            required
-            autoComplete="email"
-            className="mt-2 w-full rounded-xl border border-warm-100 bg-white px-4 py-3 text-sm focus:border-thread-300 focus:outline-none focus:ring-2 focus:ring-thread-100"
-          />
-        </label>
+        <form action={action} className="flex flex-col gap-4">
+          <input type="hidden" name="redirect" value={redirect} />
 
-        {tab !== "magic" ? (
-          <label className="text-sm font-medium text-warm-900/80">
-            Password
+          <label className="block text-sm font-medium text-foreground">
+            Email
             <input
-              type="password"
-              name="password"
+              type="email"
+              name="email"
               required
-              minLength={8}
-              autoComplete={tab === "signup" ? "new-password" : "current-password"}
-              className="mt-2 w-full rounded-xl border border-warm-100 bg-white px-4 py-3 text-sm focus:border-thread-300 focus:outline-none focus:ring-2 focus:ring-thread-100"
+              autoComplete="email"
+              className="mt-1.5 w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-[var(--thread)] focus:outline-none focus:ring-2 focus:ring-[var(--thread)]/20"
+              placeholder="you@example.com"
             />
           </label>
+
+          {!magicOpen ? (
+            <label className="block text-sm font-medium text-foreground">
+              Password
+              <input
+                type="password"
+                name="password"
+                required
+                minLength={8}
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                className="mt-1.5 w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-[var(--thread)] focus:outline-none focus:ring-2 focus:ring-[var(--thread)]/20"
+                placeholder={mode === "signup" ? "At least 8 characters" : "Your password"}
+              />
+            </label>
+          ) : null}
+
+          {activeState.error ? (
+            <p
+              className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+              role="alert"
+            >
+              {activeState.error}
+            </p>
+          ) : null}
+          {activeState.success ? (
+            <p
+              className="rounded-xl border border-border bg-[var(--thread)]/8 px-3 py-2 text-sm text-foreground"
+              role="status"
+            >
+              {activeState.success}
+            </p>
+          ) : null}
+
+          <button
+            type="submit"
+            disabled={pending}
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--thread)] py-3.5 text-sm font-semibold text-primary-foreground shadow-md transition-transform active:scale-[0.98] disabled:opacity-60"
+          >
+            {pending
+              ? "Please wait…"
+              : magicOpen
+                ? "Send magic link"
+                : mode === "login"
+                  ? "Sign in"
+                  : "Create account"}
+          </button>
+        </form>
+
+        {!magicOpen ? (
+          <button
+            type="button"
+            onClick={() => {
+              setMagicOpen(true);
+            }}
+            className="mt-4 flex w-full items-center justify-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-[var(--thread)]"
+          >
+            <Mail className="h-4 w-4" strokeWidth={2} />
+            Email me a magic link
+          </button>
         ) : null}
 
-        {state.error ? (
-          <p className="text-sm text-red-600" role="alert">
-            {state.error}
-          </p>
-        ) : null}
-        {state.success ? (
-          <p className="text-sm text-thread-700" role="status">
-            {state.success}
-          </p>
-        ) : null}
-
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-xl bg-thread-600 py-3.5 text-sm font-medium text-white disabled:opacity-50"
-        >
-          {pending
-            ? "Please wait…"
-            : tab === "login"
-              ? "Log in"
-              : tab === "signup"
-                ? "Create account"
-                : "Send magic link"}
-        </button>
-      </form>
+        <p className="mt-5 text-pretty text-center text-[11px] leading-relaxed text-muted-foreground">
+          Ito is private by default. Your threads are only between you and the people you
+          invite.
+        </p>
+      </div>
     </div>
   );
 }

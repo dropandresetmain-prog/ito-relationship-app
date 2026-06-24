@@ -16,22 +16,6 @@ begin
 end;
 $$;
 
-create or replace function public.is_thread_member(p_thread_id uuid, p_user_id uuid)
-returns boolean
-language sql
-security definer
-set search_path = public
-stable
-as $$
-  select exists (
-    select 1 from public.thread_members
-    where thread_id = p_thread_id and user_id = p_user_id
-  );
-$$;
-
-revoke all on function public.is_thread_member(uuid, uuid) from public;
-grant execute on function public.is_thread_member(uuid, uuid) to authenticated;
-
 -- ---------------------------------------------------------------------------
 -- profiles
 -- ---------------------------------------------------------------------------
@@ -54,17 +38,6 @@ alter table public.profiles enable row level security;
 create policy profiles_select_own
   on public.profiles for select
   using (id = auth.uid());
-
-create policy profiles_select_thread_peers
-  on public.profiles for select
-  using (
-    profiles.id <> auth.uid()
-    and exists (
-      select 1 from public.thread_members tm
-      where tm.user_id = profiles.id
-        and public.is_thread_member(tm.thread_id, auth.uid())
-    )
-  );
 
 create policy profiles_insert_own
   on public.profiles for insert
@@ -104,17 +77,9 @@ create trigger threads_set_updated_at
 
 alter table public.threads enable row level security;
 
-create policy threads_select_member
-  on public.threads for select
-  using (public.is_thread_member(threads.id, auth.uid()));
-
 create policy threads_insert_authenticated
   on public.threads for insert
   with check (auth.uid() is not null and created_by = auth.uid());
-
-create policy threads_update_member
-  on public.threads for update
-  using (public.is_thread_member(threads.id, auth.uid()));
 
 -- ---------------------------------------------------------------------------
 -- thread_members
@@ -133,6 +98,46 @@ create table public.thread_members (
 
 create index thread_members_user_id_idx on public.thread_members (user_id);
 create index thread_members_thread_id_idx on public.thread_members (thread_id);
+
+-- Defined after thread_members exists (SQL functions validate table refs at create time).
+create or replace function public.is_thread_member(p_thread_id uuid, p_user_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (
+    select 1 from public.thread_members
+    where thread_id = p_thread_id and user_id = p_user_id
+  );
+$$;
+
+revoke all on function public.is_thread_member(uuid, uuid) from public;
+grant execute on function public.is_thread_member(uuid, uuid) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Member-dependent RLS (requires is_thread_member)
+-- ---------------------------------------------------------------------------
+
+create policy profiles_select_thread_peers
+  on public.profiles for select
+  using (
+    profiles.id <> auth.uid()
+    and exists (
+      select 1 from public.thread_members tm
+      where tm.user_id = profiles.id
+        and public.is_thread_member(tm.thread_id, auth.uid())
+    )
+  );
+
+create policy threads_select_member
+  on public.threads for select
+  using (public.is_thread_member(threads.id, auth.uid()));
+
+create policy threads_update_member
+  on public.threads for update
+  using (public.is_thread_member(threads.id, auth.uid()));
 
 alter table public.thread_members enable row level security;
 

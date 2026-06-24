@@ -30,6 +30,7 @@ yarn-error.log*
 
 # env files
 .env
+.env.local
 .env*.local
 
 # vercel
@@ -38,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# v0 design reference (local only — not committed)
+/v0-design-reference/
