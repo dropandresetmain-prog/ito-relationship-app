@@ -1,6 +1,13 @@
 # Known Issues
 
-**Updated after M1.5 merge (`542e3f2`)**
+**Updated after M1.6 hotfix branch (`hotfix/thread-create-rls-contrast-db-audit`)**
+
+## Fixed in M1.6 hotfix
+
+- **Thread create RLS failure** — `createThread()` `insert().select("id")` failed because only `threads_select_member` existed; creator not yet in `thread_members`. Fixed via `threads_select_creator` migration.
+- **Evening scene text contrast** — dark `text-foreground` on orange evening backdrop; header, empty state, Living Tree back link unreadable. Fixed via `isDimScene` (evening + night) in `lib/scene/scene-theme.ts`.
+- **BottomNav on scene pages** — improved contrast with `variant="scene"` on `ScenePageLayout`.
+- **Legacy components** — removed in `9ada271` (`AppShell`, `ThreadPulseForm`, etc.)
 
 ## M1 limitations (still open)
 
@@ -9,46 +16,48 @@
 - **`opened_at` not updated** — inbox unread state never clears automatically when viewing
 - **No reactions, moments, reminders, message bank, or AI (Gemini)**
 - **No automated tests**
-- **Email confirmation** — if enabled in Supabase, signup requires verify before session; UI now shows “Check your email” but dev testing is still constrained by email limits
-- **Magic link** — requires `NEXT_PUBLIC_SITE_URL` and matching Supabase redirect URLs on Vercel
+- **Email confirmation** — dev testing constrained by Supabase email limits
+- **Magic link** — requires `NEXT_PUBLIC_SITE_URL` and matching Supabase redirect URLs
 
-## M1.5 UI risks
+## M1.5 / UI risks
 
-- **Charm coordinates** — knot slots in `lib/scene/thread-garden.ts` / `living-tree.ts` may need per-device visual QA; retune `charmSlots` if threads look misaligned
-- **Max 6 home charms** — `THREAD_GARDEN.charmSlots` has 6 positions; additional threads are not shown on the garden scene (still accessible via `/threads`)
-- **Legacy components** — `AppShell`, `ThreadPulseForm`, `TreeIdentityCard`, `NotificationInboxItem` remain in repo but are unused; safe to remove in a cleanup pass
-- **Hydration** — scene particles use client-only mount; watch console on preview/production
-- **Scene image weight** — 9 PNGs in `public/scenes/`; monitor Vercel asset delivery and LCP
+- **Charm coordinates** — may need per-device visual QA
+- **Max 6 home charms** — extra threads only on `/threads`
+- **Hydration** — particles client-only; watch console
+- **Night time** — reuses evening PNG + night tint
 
-## RLS / security notes
+## Database / efficiency (audit)
 
-- `get_invite_preview` is granted to `anon` — only returns data for the exact invite code queried
+- **Duplicate profile reads** — `requireProfile()` called multiple times per page (home, thread detail)
+- **Full inbox fetch** — home and thread detail load full inbox for unread counts
+- See `docs/audits/DATABASE_USAGE_AUDIT.md` — no noisy UI writes found
+
+## RLS / security
+
+- `get_invite_preview` granted to `anon`
 - `accept_thread_invite` and `is_thread_member` are `SECURITY DEFINER`
+- `threads_select_creator` — creators can SELECT own threads only (`created_by = auth.uid()`)
 - No service role key in app
 
-## Migration
+## Migrations
 
-- **Ordering fix applied** — `is_thread_member()` is created after `thread_members` in `20250624100000_ito_m1_schema.sql`
-- Remote Supabase may already have schema from earlier apply; editing committed migration is acceptable pre-production but do not re-push blindly to databases with divergent history
+Apply in order:
+
+1. `20250624100000_ito_m1_schema.sql`
+2. `20250625120000_allow_thread_creator_select.sql` (**new — required for thread create**)
 
 ## PWA
 
-- Manifest only; no service worker or install icons
+- Manifest only; no service worker
 - Middleware edge warning about `@supabase/supabase-js` Node API — build succeeds
 
 ## Archived / local-only
 
-- **Quiet Window** — assets and config preserved; not routed (closed-window art needs revision before activation). See `docs/design/ARCHIVED_SCENES.md`
-- **`/v0-design-reference/`** — gitignored; do not commit
-
-## Legacy
-
-- `supabase/migrations/legacy/` — old Telegram prototype schema
-- Branch `backup/pre-ito-telegram-prototype`
+- **Quiet Window** — not routed. See `docs/design/ARCHIVED_SCENES.md`
+- **`/v0-design-reference/`** — gitignored
 
 ## What not to do
 
-- Do not reintroduce v0 mock `CONNECTIONS` / `INBOX` as runtime data
-- Do not overwrite scene components with v0 `ito-screen.tsx` monolith
-- Do not add chat, comments, or social feed behavior
-- Do not change schema without migration review
+- Do not start M2 until M1.6 merged and production smoke test passes
+- Do not reintroduce v0 mock data at runtime
+- Do not add usage/analytics tables for trivial UI events

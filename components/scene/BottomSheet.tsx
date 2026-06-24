@@ -15,7 +15,7 @@ export function BottomSheet({ children, sheetKey, className }: BottomSheetProps)
       key={sheetKey}
       className={cn(
         "animate-sheet-up absolute inset-x-0 bottom-0 z-20",
-        "rounded-t-[2rem] border-t border-border bg-card/85 backdrop-blur-md paper-shadow",
+        "rounded-t-[2rem] border-t border-border bg-card/95 backdrop-blur-md paper-shadow",
         "px-5 pb-7 pt-3",
         className
       )}

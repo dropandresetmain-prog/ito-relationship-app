@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState, type ReactNode } from "react";
 import type { SceneConfig, TimeOfDay } from "@/lib/scene/types";
 import { sceneForTime } from "@/lib/scene/time-of-day";
+import { isDimScene, sceneHeroTextClass, sceneHeroTextMutedClass } from "@/lib/scene/scene-theme";
 import { cn } from "@/lib/utils";
 import { Bird } from "./Bird";
 import { Particles } from "./Particles";
@@ -43,14 +44,14 @@ export function SceneShell({
   overlay,
 }: SceneShellProps) {
   const sceneSrc = sceneForTime(config.scenes, time);
-  const isNight = time === "night";
+  const dimScene = isDimScene(time);
   const [imageFailed, setImageFailed] = useState(false);
 
   return (
     <div
       className={cn(
         "relative h-full min-h-full w-full overflow-hidden bg-background",
-        isNight ? "text-card" : "text-foreground"
+        dimScene ? "text-card" : "text-foreground"
       )}
     >
       {!imageFailed ? (
@@ -79,12 +80,23 @@ export function SceneShell({
         </p>
       ) : null}
       <div aria-hidden className="absolute inset-0" style={{ background: TINTS[time] }} />
+      {dimScene ? (
+        <div
+          aria-hidden
+          className="absolute inset-x-0 top-0 z-[1] h-36"
+          style={{
+            background:
+              "linear-gradient(180deg, oklch(0.18 0.03 45 / 0.55) 0%, transparent 100%)",
+          }}
+        />
+      ) : null}
       <div
         aria-hidden
         className="absolute inset-x-0 bottom-0 h-2/3"
         style={{
-          background:
-            "linear-gradient(180deg, transparent, oklch(0.18 0.02 50 / 0.18) 55%, oklch(0.16 0.02 50 / 0.42))",
+          background: dimScene
+            ? "linear-gradient(180deg, transparent, oklch(0.14 0.02 45 / 0.35) 40%, oklch(0.12 0.02 45 / 0.62))"
+            : "linear-gradient(180deg, transparent, oklch(0.18 0.02 50 / 0.18) 55%, oklch(0.16 0.02 50 / 0.42))",
         }}
       />
 
@@ -97,15 +109,15 @@ export function SceneShell({
           <p
             className={cn(
               "font-heading text-2xl font-semibold leading-none tracking-tight text-shadow-soft",
-              isNight ? "text-card" : "text-foreground"
+              dimScene ? sceneHeroTextClass : "text-foreground"
             )}
           >
             Ito
           </p>
           <p
             className={cn(
-              "mt-1 text-[11px] font-medium text-shadow-soft",
-              isNight ? "text-card/80" : "text-foreground/70"
+              "mt-1 text-[11px] font-medium",
+              dimScene ? sceneHeroTextMutedClass : "text-shadow-soft text-foreground/70"
             )}
           >
             {greeting ?? GREETING[time]}

@@ -1,6 +1,6 @@
 # Architecture — Ito
 
-**Current:** M1 backend + M1.5 scene UI on `main` (`542e3f2`), deployed on Vercel.
+**Current:** M1 backend + M1.5 scene UI + M1.6 hotfix on `main` (`9ada271` + thread RLS/contrast branch). Deployed on Vercel.
 
 ## Product metaphors
 
@@ -35,7 +35,7 @@ Browser (Next.js PWA on Vercel)
 |-------|---------|---------|
 | **Scene** | `/`, `/thread/[id]`, `/inbox` | Full-bleed scenic backgrounds, charms, bottom sheets |
 | **ItoPaperShell** | `/auth`, `/onboarding`, `/threads/*`, `/invite/*`, `/settings` | Warm cream utility pages, Fraunces headings, paper cards |
-| **BottomNav** | Scene + utility pages (where enabled) | Home, Threads, Inbox, Settings |
+| **BottomNav** | Scene (`variant="scene"`) + utility pages | Home, Threads, Inbox, Settings |
 
 ### Active scenes
 
@@ -86,11 +86,16 @@ Required in Supabase dashboard:
 
 ### Migration note
 
-`20250624100000_ito_m1_schema.sql` creates `is_thread_member()` **after** `thread_members` exists, then applies member-dependent RLS. Required for clean `supabase db push` on fresh projects.
+1. `20250624100000_ito_m1_schema.sql` — base M1 schema + RLS
+2. `20250625120000_allow_thread_creator_select.sql` — `threads_select_creator` for thread create flow
+
+`is_thread_member()` is created **after** `thread_members` exists. Required for clean `supabase db push` on fresh projects.
 
 ### RLS model
 
 - All tables have RLS enabled
+- `threads_select_member` — members can read threads
+- `threads_select_creator` — creators can read own threads before membership row exists
 - `is_thread_member()` security definer helper avoids policy recursion
 - `get_invite_preview()` / `accept_thread_invite()` — security definer RPCs for invite flow
 - No service role key in the application
@@ -106,6 +111,7 @@ Required in Supabase dashboard:
 ## Scene / thread visual layer
 
 ```
+lib/scene/scene-theme.ts      → isDimScene (evening/night) text treatment
 lib/scene/map-threads.ts     → maps ThreadListItem[] to SceneConnection[] (knot slots)
 components/scene/ThreadLayer → SVG threads + charm buttons
 lib/scene/thread-path.ts     → curved path treeAnchor → knot
@@ -121,6 +127,10 @@ lib/scene/thread-path.ts     → curved path treeAnchor → knot
 ## Removed prototype
 
 Telegram Mini App removed from `main`. See `backup/pre-ito-telegram-prototype` and `supabase/migrations/legacy/`.
+
+## Database usage
+
+See `docs/audits/DATABASE_USAGE_AUDIT.md`. No UI action persistence; one pulse = one row.
 
 ## Not built yet
 

@@ -12,12 +12,22 @@ const NAV_ITEMS = [
   { href: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
-export function BottomNav() {
+interface BottomNavProps {
+  variant?: "default" | "scene";
+}
+
+export function BottomNav({ variant = "default" }: BottomNavProps) {
   const pathname = usePathname();
+  const sceneNav = variant === "scene";
 
   return (
     <nav
-      className="safe-area-bottom border-t border-border/60 bg-card/80 px-2 py-2 backdrop-blur-md"
+      className={cn(
+        "safe-area-bottom border-t px-2 py-2 backdrop-blur-md",
+        sceneNav
+          ? "border-border/80 bg-card/95 shadow-[0_-4px_20px_oklch(0.2_0.03_50_/_0.12)]"
+          : "border-border/60 bg-card/80"
+      )}
       aria-label="Main navigation"
     >
       <ul className="flex items-stretch justify-around gap-1">
@@ -33,10 +43,12 @@ export function BottomNav() {
               <Link
                 href={item.href}
                 className={cn(
-                  "flex flex-col items-center gap-0.5 rounded-xl px-2 py-2 text-[10px] font-medium transition-colors",
+                  "flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-xl px-2 py-2 text-[10px] font-medium transition-colors touch-manipulation",
                   active
                     ? "bg-[var(--thread)]/10 text-[var(--thread)]"
-                    : "text-muted-foreground hover:text-foreground"
+                    : sceneNav
+                      ? "text-foreground/75 hover:text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                 )}
                 aria-current={active ? "page" : undefined}
               >

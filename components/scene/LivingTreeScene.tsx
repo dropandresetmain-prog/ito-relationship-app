@@ -11,6 +11,7 @@ import {
   itoButtonInlineSecondaryClass,
 } from "@/lib/ito-ui";
 import { LIVING_TREE } from "@/lib/scene/living-tree";
+import { isDimScene, sceneHeroTextMutedClass } from "@/lib/scene/scene-theme";
 import type { SceneConnection, TimeOfDay } from "@/lib/scene/types";
 import type { MessageCategory, ThreadStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -65,6 +66,7 @@ export function LivingTreeScene({
   );
 
   const modeLabel = RELATIONSHIP_MODE_LABELS[relationshipMode as keyof typeof RELATIONSHIP_MODE_LABELS] ?? relationLabel;
+  const dimScene = isDimScene(time);
   const prompt =
     relationshipMode === "clare" || relationshipMode === "romantic"
       ? `${connection.name} crossed your mind?`
@@ -88,7 +90,10 @@ export function LivingTreeScene({
       <button
         type="button"
         onClick={() => router.push("/")}
-        className="absolute left-5 top-[4.5rem] z-20 min-h-11 px-1 text-xs font-medium text-foreground/70 hover:text-foreground safe-area-top touch-manipulation"
+        className={cn(
+          "absolute left-5 top-[4.5rem] z-20 min-h-11 px-1 text-xs font-medium safe-area-top touch-manipulation",
+          dimScene ? sceneHeroTextMutedClass : "text-foreground/70 hover:text-foreground"
+        )}
       >
         ← Garden
       </button>

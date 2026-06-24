@@ -1,10 +1,11 @@
-# Manual Test Checklist — Ito M1 + M1.5
+# Manual Test Checklist — Ito M1 + M1.5 + M1.6
 
 **Target:** `main` or hotfix preview on Vercel
 
 ## Prerequisites
 
 - [ ] Migration `supabase/migrations/20250624100000_ito_m1_schema.sql` applied
+- [ ] Migration `supabase/migrations/20250625120000_allow_thread_creator_select.sql` applied (**thread create**)
 - [ ] `.env.local` or Vercel env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SITE_URL`
 - [ ] Supabase Auth: Email enabled; redirect URLs include `/auth/callback` for localhost and Vercel
 - [ ] `npm run build` and `npm run lint` pass
@@ -46,6 +47,29 @@ Test on Chrome DevTools mobile or a real phone.
 ### Utility forms (`/threads/new`, etc.)
 
 - [ ] Inputs/select/button use consistent Ito styling and tap targets
+
+## M1.6 hotfix — thread create, contrast, DB
+
+### Thread create (`/threads/new`)
+
+- [ ] “Tie a thread” submits without RLS error
+- [ ] Redirects to `/thread/[id]` (Living Tree)
+- [ ] Pending thread shows invite code / disabled pulse with clear copy
+- [ ] Exactly **1** `threads` row + **1** `thread_members` row created (no extra noise)
+
+### Scene contrast (evening / night if possible)
+
+- [ ] Home header “Ito” + greeting readable on evening backdrop
+- [ ] Empty-state overlay text readable on scene (not dark-on-dark)
+- [ ] BottomNav labels/icons readable on `/` and `/inbox` (scene variant)
+- [ ] Inbox empty state readable inside bottom sheet
+- [ ] Living Tree “← Garden” link readable on dim scenes
+- [ ] ItoPaperShell utility pages (`/threads`, `/settings`) unchanged — cream/paper still correct
+
+### Database sanity
+
+- [ ] No new tables or writes for navigation / scene taps / composer open
+- [ ] One pulse send = one `pulses` row (when testable after thread create works)
 
 ## Auth
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { SceneConnection, TimeOfDay } from "@/lib/scene/types";
 import { THREAD_GARDEN } from "@/lib/scene/thread-garden";
+import { isDimScene, sceneHeroTextClass } from "@/lib/scene/scene-theme";
 import { itoButtonPrimaryClass } from "@/lib/ito-ui";
 import { cn } from "@/lib/utils";
 import { BottomSheet } from "./BottomSheet";
@@ -26,6 +27,7 @@ export function ThreadGardenHome({
 }: ThreadGardenHomeProps) {
   const router = useRouter();
   const hasThreads = connections.length > 0;
+  const dimScene = isDimScene(time);
 
   return (
     <SceneShell
@@ -42,7 +44,12 @@ export function ThreadGardenHome({
         />
       ) : (
         <div className="pointer-events-none absolute inset-x-6 top-[36%] z-10 text-center">
-          <p className="font-heading text-lg font-semibold leading-snug text-shadow-soft text-foreground">
+          <p
+            className={cn(
+              "font-heading text-lg font-semibold leading-snug",
+              dimScene ? sceneHeroTextClass : "text-shadow-soft text-foreground"
+            )}
+          >
             Your tree is waiting for its first thread.
           </p>
         </div>
