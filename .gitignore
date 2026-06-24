@@ -42,3 +42,7 @@ next-env.d.ts
 
 # v0 design reference (local only — not committed)
 /v0-design-reference/
+
+# local validation / CLI artifacts
+.worktrees/
+supabase/.temp/
