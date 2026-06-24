@@ -4,60 +4,70 @@
 
 | Concept | Meaning |
 |---------|---------|
-| **Tree** | Self / rooted identity |
+| **Tree** | Self / rooted identity (`profiles`) |
 | **Thread** | Private relationship connection |
 | **Pulse** | Tap-based act of love or attention |
 | **Moment** | Ephemeral photo update (not built) |
-| **Reaction** | Lightweight response to a pulse or moment |
+| **Reaction** | Lightweight response (not built) |
 
 ## What Ito is not
 
-- Chat or messaging threads
-- Social feed, comments, likes, followers
-- Streaks or guilt-based reminders
-- Telegram-only or couples-only
-- Public discovery or family groups
+Chat, social feed, streaks, guilt-based reminders, public discovery, Telegram-only, couples-only dyads in code.
 
-## Current implementation (v0 shell)
+## M1 implementation
 
 ```
-Browser (PWA-oriented Next.js app)
-  → static/placeholder pages
-  → mock data in lib/mock/data.ts
-  → no server API routes
-  → no database
+Browser (Next.js PWA)
+  → @supabase/ssr cookie session
+  → Server Components + Server Actions
+  → Supabase Postgres with RLS
 ```
 
-All user-visible data is **mock**. Buttons that imply sending or accepting show mock feedback only.
+### Auth
 
-## Planned direction (not implemented)
+- **Email/password** — primary sign-up and login
+- **Magic link** — OTP via `signInWithOtp`, callback at `/auth/callback`
+- Middleware refreshes session and guards routes
+- Profile required before main app (except `/invite/*` for onboarding redirect chain)
 
-```
-Browser
-  → Supabase Auth (session)
-  → API routes / RLS-scoped Supabase client
-  → Postgres: users, threads, pulses, inbox, moments, reactions
-  → Web Push for delivery (later)
-  → Gemini for optional message suggestions (later)
-```
+### Schema overview
 
-## Relationship modes (planned)
+| Table | Purpose |
+|-------|---------|
+| `profiles` | `id` = `auth.users.id`, `display_name`, optional avatar/timezone |
+| `threads` | Relationship mode, status (`pending`/`active`/`archived`), invite code |
+| `thread_members` | Membership; designed for N members, M1 enforces max 2 in app + RPC |
+| `pulses` | Sent pulses with kind (`default`/`category`/`custom`), optional category/body |
 
-Clare-specific, Romantic, Mother–Son, Family, Friends, General.
+### Relationship modes
 
-## Copy principles
+`clare`, `romantic`, `mother_son`, `family`, `friends`, `general`
 
-Use gentle, invitational language:
+### Pulse categories
 
-- “Send a pulse”, “Tie a thread”, “A small pulse can mean a lot.”
-- “Send Mum a little warmth?”, “Clare crossed your mind?”
+`loving`, `caring`, `encouraging`, `grateful`, `missing_you`, `proud_of_you`, `just_because`
 
-Avoid guilt framing (“You haven’t messaged…”, “Don’t forget her”).
+### RLS model
+
+- All tables have RLS enabled
+- `is_thread_member()` security definer helper avoids policy recursion on `thread_members`
+- `get_invite_preview()` / `accept_thread_invite()` — security definer RPCs for invite lookup/accept without exposing all pending threads
+- No service role key in the application
+
+### Known RLS limitations
+
+- `opened_at` on pulses is not auto-updated when viewed (inbox “unread” is based on `opened_at IS NULL` but nothing sets it yet)
+- Thread updates are broad for any member — no field-level restrictions
+- Invite preview RPC is callable by anon (returns only matching code rows)
 
 ## Removed prototype
 
-The Telegram Mini App (`initData` auth, `/api/couples/*`, `/api/touches/send`, Bot API notifications) was deleted from `main`. See branch `backup/pre-ito-telegram-prototype` and `supabase/migrations/legacy/`.
+Telegram Mini App (`initData`, `/api/couples/*`, service-role-only access) removed from `main`. See `backup/pre-ito-telegram-prototype` and `supabase/migrations/legacy/`.
 
-## Target schema (future)
+## Not built yet
 
-Not designed in this repo yet. Do not build on the legacy `couples` / `touches` tables.
+Web Push, Gemini, photo moments, reactions UI, reminders, notification settings, message bank admin, group thread UI, PWA service worker.
+
+## Copy principles
+
+Gentle, invitational language. Avoid guilt framing and “partner” as default generic term.

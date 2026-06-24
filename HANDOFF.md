@@ -1,52 +1,39 @@
-# Handoff — Ito Shell Reset
+# Handoff — Ito M1
 
 ## What shipped
 
-A clean **Ito PWA frontend shell** with mock data:
+Supabase-backed M1:
 
-- 8 routes (home, onboarding, threads, new thread, invite, thread detail, inbox, settings)
-- 8 UI components (AppShell, BottomNav, cards, pulse flow, inbox item, pickers)
-- Ito branding, copy, and red-thread color tokens
-- `public/manifest.json` (no service worker)
-- Docs updated to reflect shell-only state
+- Email/password + magic link auth (`@supabase/ssr` cookies)
+- Profiles with required `display_name`
+- Thread create with invite code; accept via `/invite/[code]`
+- Two-person threads (`pending` → `active`)
+- Pulse send (default / category / custom)
+- Inbox of received pulses
+- RLS on all tables; no service role key
 
-## What was removed
+## Apply before testing
 
-- Telegram Mini App (`lib/telegram`, initData hook, Web App script)
-- Couples/touches API routes and domain logic
-- Supabase service-role client (dependency removed from package.json)
-- Old UI components (HomeScreen, PairingScreen, ThinkingButton, etc.)
+1. Run migration `supabase/migrations/20250624100000_ito_m1_schema.sql`
+2. Configure `.env.local` and Supabase Auth redirect URLs
+3. See [TEST_CHECKLIST.md](./TEST_CHECKLIST.md)
 
-## Preserved elsewhere
+## Recommended next milestone (M2)
 
-- Git branch: `backup/pre-ito-telegram-prototype`
-- Legacy SQL: `supabase/migrations/legacy/`
+**Delivery + polish**
 
-## Recommended next milestone
+1. Mark pulses read (`opened_at` update on inbox view)
+2. Web Push notification on new pulse
+3. PWA icons + service worker
+4. Thread list refresh / optimistic UI after send
+5. Unarchive / leave thread flows
+6. Basic error boundaries and empty-state polish
 
-**M1 — Auth + first real thread**
+### Do not start yet
 
-1. Add Supabase project + **new** schema migration (users, threads, pulses — not legacy tables)
-2. Supabase Auth (magic link or OAuth) + session in API routes
-3. Wire `/threads/new` and `/invite/[code]` to real invite flow
-4. Wire `/thread/[id]` pulse send to database
-5. Wire `/inbox` to read received pulses
-6. Replace mock identity on home with authenticated profile
+- Photo moments, reactions, Gemini, reminders, message bank admin
+- Group thread UI (schema ready; keep M1 two-person enforcement until product ready)
 
-### Likely files to touch
+## Git
 
-- `lib/supabase/` (client + server helpers)
-- `app/api/` (new routes)
-- `supabase/migrations/` (new Ito schema)
-- `.env.example`
-- Pages currently importing `lib/mock/data.ts`
-
-### Risks
-
-- Greenfield schema design before multi-thread support is specified
-- No test suite — manual QA burden
-- PWA install experience needs icons + service worker later
-
-### Do not start yet (per product plan)
-
-- Web Push, Gemini, photo moments, reminder cron, message bank admin
+Changes are local only — not pushed per instruction.

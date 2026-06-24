@@ -2,45 +2,60 @@
 
 ```
 ito-relationship-app/
+├── middleware.ts                    # Session refresh + route guards
 ├── app/
-│   ├── layout.tsx                 # Root layout, PWA metadata
-│   ├── globals.css                # Tailwind + safe-area utilities
-│   ├── page.tsx                   # Home (/)
-│   ├── onboarding/page.tsx
-│   ├── threads/
-│   │   ├── page.tsx               # Thread list
-│   │   └── new/page.tsx           # Tie a thread (mock)
-│   ├── invite/[code]/page.tsx     # Accept invite (mock)
-│   ├── thread/[id]/page.tsx       # Pulse screen (mock)
+│   ├── layout.tsx
+│   ├── globals.css
+│   ├── page.tsx                     # Home
+│   ├── auth/
+│   │   ├── page.tsx                 # Login / signup / magic link
+│   │   └── callback/route.ts        # OAuth/magic link callback
+│   ├── onboarding/page.tsx          # Profile setup
+│   ├── threads/page.tsx
+│   ├── threads/new/page.tsx
+│   ├── invite/[code]/page.tsx
+│   ├── thread/[id]/page.tsx
 │   ├── inbox/page.tsx
 │   └── settings/page.tsx
 ├── components/
-│   ├── AppShell.tsx               # Page chrome + optional back link
-│   ├── BottomNav.tsx              # Main tab navigation
+│   ├── AppShell.tsx
+│   ├── BottomNav.tsx
+│   ├── AuthForm.tsx
+│   ├── ProfileForm.tsx
+│   ├── CreateThreadForm.tsx
+│   ├── AcceptInviteForm.tsx
+│   ├── CopyInviteLink.tsx
+│   ├── ThreadPulseForm.tsx
 │   ├── TreeIdentityCard.tsx
 │   ├── ThreadCard.tsx
 │   ├── PulseButton.tsx
 │   ├── MessageCategoryPicker.tsx
 │   ├── NotificationInboxItem.tsx
-│   └── ReactionPicker.tsx
+│   └── SignOutButton.tsx
 ├── lib/
-│   ├── types.ts                   # Shared TypeScript types
-│   ├── labels.ts                  # UI label maps
-│   └── mock/data.ts               # Mock threads, inbox, identity
-├── public/
-│   └── manifest.json              # PWA manifest (no service worker yet)
-├── supabase/migrations/legacy/    # Archived prototype SQL — not Ito schema
-├── ARCHITECTURE.md
-├── README.md
-├── KNOWN_ISSUES.md
-├── TEST_CHECKLIST.md
-└── HANDOFF.md
+│   ├── auth/
+│   │   ├── actions.ts               # signUp, signIn, magic link, signOut
+│   │   └── session.ts               # requireUser, requireProfile
+│   ├── profile/actions.ts           # saveProfile
+│   ├── threads/
+│   │   ├── actions.ts               # createThread, acceptInvite, sendPulse
+│   │   └── queries.ts               # getUserThreads, getThreadDetail, inbox
+│   ├── supabase/
+│   │   ├── client.ts                # Browser client
+│   │   ├── server.ts                # Server client (cookies)
+│   │   └── middleware.ts            # Session update logic
+│   ├── constants.ts                 # Labels and enum lists
+│   └── types.ts
+├── supabase/migrations/
+│   ├── 20250624100000_ito_m1_schema.sql
+│   └── legacy/                      # Archived Telegram prototype
+└── public/manifest.json
 ```
 
-## Data flow (today)
+## Data flow
 
 ```
-Page → mock data (lib/mock/data.ts) → presentational components
+Auth (Supabase) → profile row → thread create/join → pulse insert → inbox read
 ```
 
-No API routes. No Supabase client.
+All via anon key + RLS. Server Actions use server Supabase client with user session cookies.

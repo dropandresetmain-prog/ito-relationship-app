@@ -1,10 +1,10 @@
-import type { TreeIdentity } from "@/lib/types";
+import type { Profile } from "@/lib/types";
 
 interface TreeIdentityCardProps {
-  identity: TreeIdentity;
+  profile: Pick<Profile, "display_name">;
 }
 
-export function TreeIdentityCard({ identity }: TreeIdentityCardProps) {
+export function TreeIdentityCard({ profile }: TreeIdentityCardProps) {
   return (
     <section
       className="rounded-2xl border border-thread-100 bg-gradient-to-br from-white to-thread-50/60 p-5 shadow-sm"
@@ -22,9 +22,11 @@ export function TreeIdentityCard({ identity }: TreeIdentityCardProps) {
             Your tree
           </p>
           <h2 className="mt-1 text-xl font-semibold text-warm-900">
-            {identity.displayName}
+            {profile.display_name}
           </h2>
-          <p className="mt-1 text-sm text-warm-900/60">{identity.tagline}</p>
+          <p className="mt-1 text-sm text-warm-900/60">
+            Rooted here, threads reaching outward.
+          </p>
         </div>
       </div>
     </section>

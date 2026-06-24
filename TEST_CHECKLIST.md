@@ -1,42 +1,45 @@
-# Manual Test Checklist — Ito Shell
+# Manual Test Checklist — Ito M1
 
-## Build
+## Prerequisites
 
-- [ ] `npm install`
-- [ ] `npm run lint` passes
-- [ ] `npm run build` passes
-- [ ] `npm run dev` — app loads at http://localhost:3000
+- [ ] Apply `supabase/migrations/20250624100000_ito_m1_schema.sql`
+- [ ] Configure `.env.local` with Supabase URL, anon key, `NEXT_PUBLIC_SITE_URL`
+- [ ] Supabase Auth: Email enabled; redirect URL includes `/auth/callback`
+- [ ] `npm run build` and `npm run lint` pass
 
-## Navigation
+## Auth
 
-- [ ] Bottom nav: Home, Threads, Inbox, Settings
-- [ ] `/onboarding` reachable from Settings
-- [ ] Back links work on `/threads/new`, `/thread/[id]`
+- [ ] Sign up with email/password → onboarding
+- [ ] Set display name → redirected home
+- [ ] Log out from settings → `/auth`
+- [ ] Log in with email/password
+- [ ] Magic link: request link → email received → opens app signed in
 
-## Routes
+## Threads
 
-- [ ] `/` — tree card, gentle reminder, thread previews, “Tie a thread”
-- [ ] `/threads` — all mock threads listed
-- [ ] `/threads/new` — disabled mock form, link to invite preview
-- [ ] `/invite/DEMO12` — shows code, mock accept button
-- [ ] `/thread/thread-mum` — pulse button, categories, note, reactions
-- [ ] `/inbox` — mock pulses/moments/reactions
-- [ ] `/settings` — placeholder sections
+- [ ] User A: Tie a thread (choose mode, optional name/title)
+- [ ] User A: sees invite code/link on pending thread
+- [ ] User B: open invite link while logged out → sign in prompt
+- [ ] User B: sign up → profile → accept thread
+- [ ] Both users: thread status active
+- [ ] User B cannot accept own invite / full thread / invalid code
 
-## Copy review
+## Pulses
 
-- [ ] Uses “pulse”, “thread”, “tree” — not “touch”, “partner”, “couples”
-- [ ] No guilt-based reminder language
-- [ ] Gentle prompts present (“Send Mum a little warmth?”)
+- [ ] Active thread: send simple pulse
+- [ ] Send category pulse (each tone selectable)
+- [ ] Send custom pulse with note ≤140 chars
+- [ ] Pending thread: pulse button disabled
+- [ ] Recipient sees pulse in inbox (sender, kind/category/body, time)
 
-## Mobile
+## Navigation & copy
 
-- [ ] Readable at ~390px width
-- [ ] Pulse button centered and tappable
-- [ ] Safe-area padding acceptable on notched viewport
+- [ ] Bottom nav works
+- [ ] No “touch”, “couples”, “partner” as default copy
+- [ ] Gentle prompts where appropriate
 
-## Regression (removed prototype)
+## Regression
 
-- [ ] No Telegram Web App script in page source
-- [ ] No `/api/*` routes in build output
-- [ ] Package name is `ito-relationship-app`
+- [ ] No `/api/*` routes
+- [ ] No Telegram script
+- [ ] No mock data files in use

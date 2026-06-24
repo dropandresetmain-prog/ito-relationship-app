@@ -1,76 +1,65 @@
-"use client";
-
-import { use, useState } from "react";
+import { notFound } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
-import { MessageCategoryPicker } from "@/components/MessageCategoryPicker";
-import { PulseButton } from "@/components/PulseButton";
-import { ReactionPicker } from "@/components/ReactionPicker";
-import { mockThreads } from "@/lib/mock/data";
-import type { MessageCategory, ReactionKind } from "@/lib/types";
+import { CopyInviteLink } from "@/components/CopyInviteLink";
+import { ThreadPulseForm } from "@/components/ThreadPulseForm";
+import { RELATIONSHIP_MODE_LABELS } from "@/lib/constants";
+import { getThreadDetail } from "@/lib/threads/queries";
 
 interface ThreadPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default function ThreadPage({ params }: ThreadPageProps) {
-  const { id } = use(params);
-  const thread = mockThreads.find((item) => item.id === id) ?? mockThreads[0];
+export default async function ThreadPage({ params }: ThreadPageProps) {
+  const { id } = await params;
+  const detail = await getThreadDetail(id);
 
-  const [category, setCategory] = useState<MessageCategory>("loving");
-  const [message, setMessage] = useState("");
-  const [reaction, setReaction] = useState<ReactionKind | null>(null);
-  const [feedback, setFeedback] = useState<string | null>(null);
-  const [sending, setSending] = useState(false);
+  if (!detail) {
+    notFound();
+  }
 
-  const handlePulse = () => {
-    setSending(true);
-    setFeedback(null);
-    window.setTimeout(() => {
-      setSending(false);
-      setFeedback("Pulse sent (mock)");
-      window.setTimeout(() => setFeedback(null), 2500);
-    }, 600);
-  };
+  const { thread, otherMember, displayTitle } = detail;
+  const modeLabel = RELATIONSHIP_MODE_LABELS[thread.relationship_mode];
+  const isActive = thread.status === "active";
+  const isPending = thread.status === "pending";
+
+  const reminder =
+    thread.relationship_mode === "mother_son"
+      ? "Send Mum a little warmth?"
+      : thread.relationship_mode === "clare"
+        ? "Clare crossed your mind?"
+        : "A small pulse can mean a lot.";
 
   return (
-    <AppShell title={thread.name} backHref="/threads" showNav={false}>
-      <div className="flex flex-col items-center gap-6">
-        {thread.reminderPrompt ? (
-          <p className="text-center text-sm text-warm-900/60">
-            {thread.reminderPrompt}
-          </p>
-        ) : (
-          <p className="text-center text-sm text-warm-900/60">
-            A small pulse can mean a lot.
-          </p>
-        )}
+    <AppShell title={displayTitle} backHref="/threads" showNav={false}>
+      <div className="flex flex-col gap-6">
+        <div className="text-center">
+          <p className="text-xs font-medium text-thread-600">{modeLabel}</p>
+          {otherMember ? (
+            <p className="mt-1 text-sm text-warm-900/60">
+              Connected with {otherMember.display_name}
+            </p>
+          ) : isPending ? (
+            <p className="mt-1 text-sm text-warm-900/60">
+              Waiting for someone to accept your invite…
+            </p>
+          ) : null}
+        </div>
 
-        <PulseButton onPulse={handlePulse} sending={sending} />
-
-        {feedback ? (
-          <p className="text-sm font-medium text-thread-600">{feedback}</p>
+        {isPending ? (
+          <CopyInviteLink code={thread.invite_code} />
         ) : null}
 
-        <div className="w-full space-y-5">
-          <MessageCategoryPicker value={category} onChange={setCategory} />
+        <p className="text-center text-sm text-warm-900/60">{reminder}</p>
 
-          <label className="block text-sm font-medium text-warm-900/80">
-            Optional note
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value.slice(0, 140))}
-              placeholder="A few gentle words…"
-              rows={3}
-              maxLength={140}
-              className="mt-2 w-full resize-none rounded-xl border border-warm-100 bg-white px-4 py-3 text-sm focus:border-thread-300 focus:outline-none focus:ring-2 focus:ring-thread-100"
-            />
-            <span className="mt-1 block text-right text-xs text-warm-900/40">
-              {message.length}/140
-            </span>
-          </label>
-
-          <ReactionPicker value={reaction} onChange={setReaction} />
-        </div>
+        <ThreadPulseForm
+          threadId={thread.id}
+          disabled={!isActive}
+          disabledReason={
+            !isActive
+              ? "Send a pulse once this thread is tied with another person."
+              : undefined
+          }
+        />
       </div>
     </AppShell>
   );

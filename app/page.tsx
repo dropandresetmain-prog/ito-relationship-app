@@ -2,20 +2,21 @@ import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
 import { ThreadCard } from "@/components/ThreadCard";
 import { TreeIdentityCard } from "@/components/TreeIdentityCard";
-import {
-  mockGentleReminders,
-  mockThreads,
-  mockTreeIdentity,
-} from "@/lib/mock/data";
+import { requireProfile } from "@/lib/auth/session";
+import { getUserThreads } from "@/lib/threads/queries";
 
-export default function HomePage() {
-  const reminder = mockGentleReminders[0];
-  const featuredThreads = mockThreads.slice(0, 2);
+export default async function HomePage() {
+  const { profile } = await requireProfile();
+  const threads = await getUserThreads();
+  const featuredThreads = threads.slice(0, 2);
+  const reminder =
+    threads.find((t) => t.reminderPrompt)?.reminderPrompt ??
+    "A small pulse can mean a lot.";
 
   return (
     <AppShell>
       <div className="flex flex-col gap-6">
-        <TreeIdentityCard identity={mockTreeIdentity} />
+        <TreeIdentityCard profile={profile} />
 
         <section
           className="rounded-2xl border border-thread-100 bg-thread-50/50 px-4 py-3"
@@ -34,11 +35,17 @@ export default function HomePage() {
               See all
             </Link>
           </div>
-          <div className="flex flex-col gap-3">
-            {featuredThreads.map((thread) => (
-              <ThreadCard key={thread.id} thread={thread} />
-            ))}
-          </div>
+          {featuredThreads.length > 0 ? (
+            <div className="flex flex-col gap-3">
+              {featuredThreads.map((thread) => (
+                <ThreadCard key={thread.id} thread={thread} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-warm-900/50">
+              No threads yet. Tie your first thread below.
+            </p>
+          )}
         </section>
 
         <Link

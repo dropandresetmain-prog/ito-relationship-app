@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { MESSAGE_CATEGORY_LABELS } from "@/lib/mock/data";
-import { INBOX_TYPE_LABELS } from "@/lib/labels";
-import type { InboxItem } from "@/lib/types";
+import { MESSAGE_CATEGORY_LABELS, PULSE_KIND_LABELS } from "@/lib/constants";
+import type { InboxPulseItem } from "@/lib/types";
 
 interface NotificationInboxItemProps {
-  item: InboxItem;
+  item: InboxPulseItem;
 }
 
 function formatWhen(iso: string): string {
@@ -18,7 +17,7 @@ function formatWhen(iso: string): string {
 }
 
 export function NotificationInboxItem({ item }: NotificationInboxItemProps) {
-  const typeLabel = INBOX_TYPE_LABELS[item.type];
+  const typeLabel = PULSE_KIND_LABELS[item.pulseKind];
   const categoryLabel = item.category
     ? MESSAGE_CATEGORY_LABELS[item.category]
     : null;
@@ -39,8 +38,12 @@ export function NotificationInboxItem({ item }: NotificationInboxItemProps) {
             {categoryLabel ? ` · ${categoryLabel}` : ""}
           </p>
           <h3 className="mt-1 font-semibold text-warm-900">{item.fromName}</h3>
-          {item.message ? (
-            <p className="mt-1 text-sm text-warm-900/65">{item.message}</p>
+          {item.body ? (
+            <p className="mt-1 text-sm text-warm-900/65">{item.body}</p>
+          ) : item.pulseKind === "default" ? (
+            <p className="mt-1 text-sm text-warm-900/65">
+              A small pulse can mean a lot.
+            </p>
           ) : null}
         </div>
         {!item.read ? (

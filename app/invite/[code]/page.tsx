@@ -1,5 +1,8 @@
-import Link from "next/link";
+import { notFound } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
+import { AcceptInviteForm } from "@/components/AcceptInviteForm";
+import { createClient } from "@/lib/supabase/server";
+import { getInvitePreview } from "@/lib/threads/queries";
 
 interface InvitePageProps {
   params: Promise<{ code: string }>;
@@ -7,6 +10,26 @@ interface InvitePageProps {
 
 export default async function InvitePage({ params }: InvitePageProps) {
   const { code } = await params;
+  const preview = await getInvitePreview(code);
+
+  if (!preview) {
+    notFound();
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let hasProfile = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", user.id)
+      .maybeSingle();
+    hasProfile = !!profile;
+  }
 
   return (
     <AppShell title="Accept a thread" showNav={false}>
@@ -18,9 +41,6 @@ export default async function InvitePage({ params }: InvitePageProps) {
           <p className="mt-2 text-3xl font-bold tracking-widest text-thread-700">
             {code.toUpperCase()}
           </p>
-          <p className="mt-3 text-sm text-warm-900/60">
-            Someone wants to tie a private thread with you on Ito.
-          </p>
         </div>
 
         <p className="text-sm text-warm-900/55">
@@ -28,21 +48,12 @@ export default async function InvitePage({ params }: InvitePageProps) {
           public profile.
         </p>
 
-        <div className="mt-auto flex flex-col gap-3">
-          <button
-            type="button"
-            disabled
-            className="rounded-xl bg-thread-600 py-3.5 text-sm font-medium text-white opacity-50"
-          >
-            Accept thread (mock)
-          </button>
-          <Link
-            href="/threads"
-            className="rounded-xl border border-warm-100 py-3.5 text-center text-sm font-medium text-thread-600"
-          >
-            Not now
-          </Link>
-        </div>
+        <AcceptInviteForm
+          code={code}
+          preview={preview}
+          isLoggedIn={!!user}
+          hasProfile={hasProfile}
+        />
       </div>
     </AppShell>
   );

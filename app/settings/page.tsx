@@ -1,18 +1,18 @@
-import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
+import { SignOutButton } from "@/components/SignOutButton";
+import { requireProfile } from "@/lib/auth/session";
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const { profile, user } = await requireProfile();
+
   return (
     <AppShell title="Settings">
       <div className="flex flex-col gap-4">
-        <p className="text-sm text-warm-900/60">
-          Notification preferences and account settings will live here.
-        </p>
-
-        <section className="rounded-2xl border border-warm-100 bg-white divide-y divide-warm-100">
+        <section className="divide-y divide-warm-100 rounded-2xl border border-warm-100 bg-white">
           <div className="px-4 py-3">
             <p className="text-sm font-medium text-warm-900">Profile</p>
-            <p className="text-xs text-warm-900/45">Coming with Supabase Auth</p>
+            <p className="text-sm text-warm-900/60">{profile.display_name}</p>
+            <p className="text-xs text-warm-900/40">{user.email}</p>
           </div>
           <div className="px-4 py-3">
             <p className="text-sm font-medium text-warm-900">Notifications</p>
@@ -23,17 +23,12 @@ export default function SettingsPage() {
           <div className="px-4 py-3">
             <p className="text-sm font-medium text-warm-900">Gentle reminders</p>
             <p className="text-xs text-warm-900/45">
-              Optional prompts — never guilt-based
+              Optional prompts — never guilt-based (coming later)
             </p>
           </div>
         </section>
 
-        <Link
-          href="/onboarding"
-          className="text-sm font-medium text-thread-600"
-        >
-          Revisit onboarding
-        </Link>
+        <SignOutButton />
       </div>
     </AppShell>
   );

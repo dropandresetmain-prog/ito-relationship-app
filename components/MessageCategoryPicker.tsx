@@ -1,9 +1,7 @@
 "use client";
 
-import { MESSAGE_CATEGORY_LABELS } from "@/lib/mock/data";
+import { MESSAGE_CATEGORIES, MESSAGE_CATEGORY_LABELS } from "@/lib/constants";
 import type { MessageCategory } from "@/lib/types";
-
-const CATEGORIES = Object.keys(MESSAGE_CATEGORY_LABELS) as MessageCategory[];
 
 interface MessageCategoryPickerProps {
   value: MessageCategory;
@@ -20,7 +18,7 @@ export function MessageCategoryPicker({
         Message tone
       </legend>
       <div className="flex flex-wrap gap-2">
-        {CATEGORIES.map((category) => {
+        {MESSAGE_CATEGORIES.map((category) => {
           const selected = value === category;
           return (
             <button
