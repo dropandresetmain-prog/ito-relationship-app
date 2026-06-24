@@ -37,7 +37,7 @@ export function ItoPaperShell({
         {backHref ? (
           <Link
             href={backHref}
-            className="mb-3 inline-flex text-sm font-medium text-[var(--thread)] hover:text-foreground"
+            className="mb-3 inline-flex min-h-11 items-center text-sm font-medium text-[var(--thread)] hover:text-foreground touch-manipulation"
             aria-label="Go back"
           >
             ← {backLabel}

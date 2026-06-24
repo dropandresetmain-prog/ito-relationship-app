@@ -6,6 +6,10 @@ import { PULSE_CATEGORIES } from "@/lib/scene/pulse-categories";
 import type { SceneConnection } from "@/lib/scene/types";
 import { sendPulse, type ThreadActionState } from "@/lib/threads/actions";
 import type { MessageCategory } from "@/lib/types";
+import {
+  itoButtonPrimaryClass,
+  itoIconButtonClass,
+} from "@/lib/ito-ui";
 import { cn } from "@/lib/utils";
 
 interface PulseComposerProps {
@@ -62,7 +66,7 @@ export function PulseComposer({
           type="button"
           onClick={onBack}
           aria-label="Back"
-          className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className={itoIconButtonClass}
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
@@ -89,7 +93,7 @@ export function PulseComposer({
                   onClick={() => setSelected(cat.id)}
                   aria-pressed={isOn}
                   className={cn(
-                    "flex flex-col items-center gap-1 rounded-2xl border px-1 py-2.5 text-center transition-all",
+                    "flex min-h-11 flex-col items-center justify-center gap-1 rounded-2xl border px-1 py-2.5 text-center transition-all touch-manipulation",
                     isOn
                       ? "border-[var(--thread)] bg-[var(--thread)]/10 text-foreground"
                       : "border-border bg-background/60 text-muted-foreground hover:border-[var(--thread)]/40"
@@ -130,7 +134,7 @@ export function PulseComposer({
             type="button"
             onClick={handleSend}
             disabled={pending}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-[var(--thread)] py-3 text-sm font-semibold text-primary-foreground shadow-md transition-transform active:scale-[0.98] disabled:opacity-60"
+            className={cn("mt-3", itoButtonPrimaryClass)}
           >
             {pending ? "Sending…" : "Send a pulse"}
           </button>

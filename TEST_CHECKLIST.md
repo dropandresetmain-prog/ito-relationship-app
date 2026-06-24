@@ -1,6 +1,6 @@
 # Manual Test Checklist — Ito M1 + M1.5
 
-**Target:** `main` (`542e3f2`) — local or Vercel production/preview
+**Target:** `main` or hotfix preview on Vercel
 
 ## Prerequisites
 
@@ -8,6 +8,44 @@
 - [ ] `.env.local` or Vercel env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SITE_URL`
 - [ ] Supabase Auth: Email enabled; redirect URLs include `/auth/callback` for localhost and Vercel
 - [ ] `npm run build` and `npm run lint` pass
+- [ ] `tailwind.config.ts` includes `./lib/**` in `content` (so `lib/ito-ui.ts` button classes are not purged)
+
+## Mobile QA (375px viewport) — hotfix
+
+Test on Chrome DevTools mobile or a real phone.
+
+### Auth CTA (`/auth`)
+
+- [ ] Sign in button: full width, ≥48px tall, readable text, easy to tap
+- [ ] Create account button: same
+- [ ] Magic link send + back controls: tappable (≥44px where practical)
+- [ ] Loading states visible on submit
+
+### Home empty state (`/`)
+
+- [ ] After login, Thread Garden scene fills area above bottom nav (not blank)
+- [ ] No threads: message “Your tree is waiting for its first thread.”
+- [ ] “Tie a thread” CTA visible in bottom sheet, **not covered** by `BottomNav`
+- [ ] Scene PNG loads (`/scenes/thread-garden-*.png` → 200)
+
+### Scene image fallback
+
+- [ ] If scene image fails, gradient fallback + readable message still shows (optional: break image URL locally)
+
+### Thread detail CTA (`/thread/[id]`)
+
+- [ ] Living Tree scene visible
+- [ ] “Send a pulse” button readable and tappable (inline row with “All threads”)
+- [ ] Pulse composer send button full width and tappable
+
+### Inbox (`/inbox`)
+
+- [ ] Inbox panel visible over garden scene
+- [ ] List scrolls inside sheet (`max-h`); back control tappable
+
+### Utility forms (`/threads/new`, etc.)
+
+- [ ] Inputs/select/button use consistent Ito styling and tap targets
 
 ## Auth
 
@@ -37,7 +75,7 @@
 ## Thread Garden home (`/`)
 
 - [ ] Renders Thread Garden scene (not old list home)
-- [ ] **Empty home:** no floating charms/threads; clear “Tie a thread” CTA
+- [ ] **Empty home:** scene visible; “Your tree is waiting for its first thread.” + “Tie a thread” CTA above nav
 - [ ] **With threads:** charms from real Supabase data (max 6 on scene)
 - [ ] Red threads anchored to tree knots and charms — no floating connector marks
 - [ ] Tap charm → `/thread/[id]`

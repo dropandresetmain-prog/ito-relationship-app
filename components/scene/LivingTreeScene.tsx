@@ -5,9 +5,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Send } from "lucide-react";
 import { RELATIONSHIP_MODE_LABELS } from "@/lib/constants";
+import {
+  itoButtonCompactSecondaryClass,
+  itoButtonInlinePrimaryClass,
+  itoButtonInlineSecondaryClass,
+} from "@/lib/ito-ui";
 import { LIVING_TREE } from "@/lib/scene/living-tree";
 import type { SceneConnection, TimeOfDay } from "@/lib/scene/types";
 import type { MessageCategory, ThreadStatus } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { PulseComposer } from "@/components/pulse/PulseComposer";
 import { BottomSheet } from "./BottomSheet";
 import { SceneInboxButton } from "./SceneInboxButton";
@@ -82,7 +88,7 @@ export function LivingTreeScene({
       <button
         type="button"
         onClick={() => router.push("/")}
-        className="absolute left-5 top-[4.5rem] z-20 text-xs font-medium text-foreground/70 hover:text-foreground safe-area-top"
+        className="absolute left-5 top-[4.5rem] z-20 min-h-11 px-1 text-xs font-medium text-foreground/70 hover:text-foreground safe-area-top touch-manipulation"
       >
         ← Garden
       </button>
@@ -114,15 +120,12 @@ export function LivingTreeScene({
                 type="button"
                 onClick={() => setView("send")}
                 disabled={!isActive}
-                className="flex flex-[2] items-center justify-center gap-2 rounded-full bg-[var(--thread)] py-3 text-sm font-semibold text-primary-foreground transition-transform active:scale-[0.98] disabled:opacity-50"
+                className={itoButtonInlinePrimaryClass}
               >
                 <Send className="h-4 w-4" />
                 Send a pulse
               </button>
-              <Link
-                href="/threads"
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-border bg-background/60 py-3 text-xs font-medium text-foreground"
-              >
+              <Link href="/threads" className={itoButtonInlineSecondaryClass}>
                 All threads
               </Link>
             </div>
@@ -161,7 +164,7 @@ export function LivingTreeScene({
             <button
               type="button"
               onClick={() => setView("relationship")}
-              className="mt-4 rounded-full border border-border bg-background/60 px-6 py-2 text-sm font-medium text-foreground"
+              className={cn("mt-4", itoButtonCompactSecondaryClass)}
             >
               Done
             </button>

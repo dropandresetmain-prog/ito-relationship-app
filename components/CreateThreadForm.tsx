@@ -9,6 +9,7 @@ import {
   itoButtonPrimaryClass,
   itoInputClass,
   itoLabelClass,
+  itoSelectClass,
 } from "@/lib/ito-ui";
 
 const initialState: ThreadActionState = {};
@@ -44,7 +45,7 @@ export function CreateThreadForm() {
           name="relationship_mode"
           required
           defaultValue="general"
-          className={itoInputClass}
+          className={itoSelectClass}
         >
           {RELATIONSHIP_MODES.map((mode) => (
             <option key={mode} value={mode}>
