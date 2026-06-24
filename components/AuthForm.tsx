@@ -117,7 +117,7 @@ export function AuthForm() {
               aria-selected={mode === key}
               onClick={() => setMode(key)}
               className={cn(
-                "flex-1 rounded-xl py-2.5 text-sm font-medium transition-all",
+                "min-h-11 flex-1 rounded-xl py-2.5 text-sm font-medium transition-all touch-manipulation",
                 mode === key
                   ? "bg-[var(--thread)] text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
@@ -133,7 +133,7 @@ export function AuthForm() {
           <button
             type="button"
             onClick={() => setMagicOpen(false)}
-            className="text-xs font-medium text-muted-foreground hover:text-foreground"
+            className="min-h-11 px-2 text-xs font-medium text-muted-foreground hover:text-foreground touch-manipulation"
           >
             Back to password
           </button>
@@ -206,7 +206,7 @@ export function AuthForm() {
         <button
           type="button"
           onClick={() => setMagicOpen(true)}
-          className="mt-4 flex w-full items-center justify-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-[var(--thread)]"
+          className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-[var(--thread)] touch-manipulation"
         >
           <Mail className="h-4 w-4" strokeWidth={2} />
           Email me a magic link

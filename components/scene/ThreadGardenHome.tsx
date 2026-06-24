@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { SceneConnection, TimeOfDay } from "@/lib/scene/types";
 import { THREAD_GARDEN } from "@/lib/scene/thread-garden";
+import { itoButtonPrimaryClass } from "@/lib/ito-ui";
 import { cn } from "@/lib/utils";
 import { BottomSheet } from "./BottomSheet";
 import { SceneInboxButton } from "./SceneInboxButton";
@@ -39,7 +40,13 @@ export function ThreadGardenHome({
           treeAnchor={THREAD_GARDEN.treeAnchor}
           onSelect={(id) => router.push(`/thread/${id}`)}
         />
-      ) : null}
+      ) : (
+        <div className="pointer-events-none absolute inset-x-6 top-[36%] z-10 text-center">
+          <p className="font-heading text-lg font-semibold leading-snug text-shadow-soft text-foreground">
+            Your tree is waiting for its first thread.
+          </p>
+        </div>
+      )}
 
       <BottomSheet sheetKey="home">
         {hasThreads ? (
@@ -106,15 +113,12 @@ function EmptyHomeSheet() {
   return (
     <div className="text-center">
       <p className="font-heading text-base leading-tight text-foreground">
-        Your tree is waiting.
+        Your tree is waiting for its first thread.
       </p>
       <p className="mb-4 text-xs text-muted-foreground">
         Tie your first thread to someone who matters.
       </p>
-      <Link
-        href="/threads/new"
-        className="inline-flex w-full items-center justify-center rounded-full bg-[var(--thread)] py-3 text-sm font-semibold text-primary-foreground transition-transform active:scale-[0.98]"
-      >
+      <Link href="/threads/new" className={itoButtonPrimaryClass}>
         Tie a thread
       </Link>
     </div>

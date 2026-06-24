@@ -4,10 +4,10 @@ export const itoInputClass =
 export const itoLabelClass = "block text-sm font-medium text-foreground";
 
 export const itoButtonPrimaryClass =
-  "flex w-full items-center justify-center gap-2 rounded-full bg-[var(--thread)] py-3.5 text-sm font-semibold text-primary-foreground shadow-md transition-transform active:scale-[0.98] disabled:opacity-60";
+  "box-border flex w-full min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--thread)] px-6 py-3.5 text-base font-semibold text-primary-foreground shadow-md transition-transform active:scale-[0.98] disabled:opacity-60 touch-manipulation appearance-none";
 
 export const itoButtonSecondaryClass =
-  "flex w-full items-center justify-center rounded-full border border-border bg-card/60 py-3.5 text-sm font-medium text-foreground transition-colors hover:border-[var(--thread)]/40";
+  "box-border flex w-full min-h-12 items-center justify-center rounded-full border border-border bg-card/60 px-6 py-3.5 text-base font-medium text-foreground transition-colors hover:border-[var(--thread)]/40 touch-manipulation appearance-none";
 
 export const itoCardClass =
   "rounded-2xl border border-border bg-card/85 p-5 paper-shadow backdrop-blur-sm";

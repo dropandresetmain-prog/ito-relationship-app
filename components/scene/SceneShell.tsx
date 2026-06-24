@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type { SceneConfig, TimeOfDay } from "@/lib/scene/types";
 import { sceneForTime } from "@/lib/scene/time-of-day";
 import { cn } from "@/lib/utils";
@@ -44,22 +44,40 @@ export function SceneShell({
 }: SceneShellProps) {
   const sceneSrc = sceneForTime(config.scenes, time);
   const isNight = time === "night";
+  const [imageFailed, setImageFailed] = useState(false);
 
   return (
     <div
       className={cn(
-        "relative h-full w-full overflow-hidden",
+        "relative h-full min-h-full w-full overflow-hidden bg-background",
         isNight ? "text-card" : "text-foreground"
       )}
     >
-      <Image
-        src={sceneSrc}
-        alt={`${config.name} scene at ${time}`}
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover"
-      />
+      {!imageFailed ? (
+        <Image
+          src={sceneSrc}
+          alt={`${config.name} scene at ${time}`}
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+          onError={() => setImageFailed(true)}
+        />
+      ) : (
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, oklch(0.94 0.02 85) 0%, oklch(0.88 0.04 95) 45%, oklch(0.82 0.06 110) 100%)",
+          }}
+        />
+      )}
+      {imageFailed ? (
+        <p className="absolute inset-x-6 top-1/3 z-10 text-center text-sm text-muted-foreground">
+          Scene image couldn&apos;t load — your garden is still here.
+        </p>
+      ) : null}
       <div aria-hidden className="absolute inset-0" style={{ background: TINTS[time] }} />
       <div
         aria-hidden
