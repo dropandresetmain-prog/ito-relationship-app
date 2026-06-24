@@ -4,29 +4,43 @@
 
 Ito is **not** a chat app, social feed, or couples-only Telegram Mini App.
 
-## Current state (M1)
+## Current state (M1 + M1.5 on `main`)
 
-Implemented:
+**Latest commit:** `542e3f2` on `main`, deployed via Vercel.
 
-- Supabase Auth (email/password + magic link)
+### M1 — Backend & core flows
+
+- Supabase Auth (email/password primary, magic link secondary)
 - User profiles (`display_name`)
 - Two-person threads with invite codes
 - Pulse send (default, category, custom ≤140 chars)
 - Inbox of received pulses
 - Row Level Security on all tables
 
-Not implemented yet:
+### M1.5 — Scene UI & journey polish
+
+- **Thread Garden** home scene (`/`)
+- **Living Tree** relationship detail scene (`/thread/[id]`)
+- Scene-styled inbox (`/inbox`)
+- Ito auth UX (verification email success state, magic link feedback)
+- **ItoPaperShell** utility pages (onboarding, threads, invite, settings)
+- Scene assets in `public/scenes/`
+- Thread/charm visual layer with anchored red threads
+- Quiet Window archived (assets + config only — not routed)
+
+### Not implemented yet
 
 - Web Push, photo moments, reactions, reminders
 - AI message generation (Gemini)
-- Message bank admin, notification settings
+- Message bank / non-repeating category pulses (M2)
 - Group threads UI (schema supports future expansion)
 
 ## Stack
 
-- Next.js 15 (App Router) + TypeScript + Tailwind CSS
-- Supabase (Auth, Postgres, RLS) via `@supabase/ssr` cookie sessions
-- PWA manifest (`public/manifest.json`) — no service worker yet
+- **Next.js 15** (App Router) + TypeScript + Tailwind CSS
+- **Supabase** (Auth, Postgres, RLS) via `@supabase/ssr` cookie sessions
+- **Vercel** — production and preview deployments from GitHub
+- **PWA manifest** (`public/manifest.json`) — no service worker yet
 
 ## Environment variables
 
@@ -36,7 +50,7 @@ Copy `.env.example` to `.env.local`:
 |----------|----------|---------|
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Anon/publishable key (client + server) |
-| `NEXT_PUBLIC_SITE_URL` | Yes | Magic link redirect base (e.g. `http://localhost:3000`) |
+| `NEXT_PUBLIC_SITE_URL` | Yes | Magic link redirect base (local: `http://localhost:3000`; production: Vercel URL) |
 
 No service role key is used. All data access goes through authenticated RLS policies.
 
@@ -48,13 +62,19 @@ Apply the M1 migration in Supabase SQL editor or CLI:
 supabase/migrations/20250624100000_ito_m1_schema.sql
 ```
 
-Legacy prototype schema is archived in `supabase/migrations/legacy/` — do not apply to new Ito databases.
+**Note:** The migration defines `is_thread_member()` after `thread_members` exists so fresh `supabase db push` succeeds. Legacy prototype schema is archived in `supabase/migrations/legacy/` — do not apply to new Ito databases.
 
-In Supabase Auth settings:
+### Supabase Auth settings
 
 - Enable Email provider
-- Add `http://localhost:3000/auth/callback` to redirect URLs (and production URL when deployed)
-- If email confirmation is enabled, users must confirm before login
+- **Redirect URLs** (required):
+  - `http://localhost:3000/**`
+  - `http://localhost:3000/auth/callback`
+  - `https://<your-vercel-domain>/**`
+  - `https://<your-vercel-domain>/auth/callback`
+  - Preview: `https://*.vercel.app/**` if using branch previews
+- Email/password is primary; magic link is secondary
+- If email confirmation is enabled, signup shows “Check your email” — users must verify before login
 
 ## Quick start
 
@@ -80,14 +100,14 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Route | Purpose |
 |-------|---------|
-| `/auth` | Sign up, log in, magic link |
+| `/auth` | Sign in, create account, magic link (Ito scenic auth card) |
 | `/onboarding` | Create profile (display name) |
-| `/` | Home — tree, threads preview |
-| `/threads` | Thread list |
+| `/` | **Thread Garden** — home scene, thread charms, tie-a-thread CTA |
+| `/threads` | Thread list (utility shell) |
 | `/threads/new` | Tie a thread |
 | `/invite/[code]` | Accept invite |
-| `/thread/[id]` | Send pulse, share invite if pending |
-| `/inbox` | Received pulses |
+| `/thread/[id]` | **Living Tree** — relationship detail, pulse composer sheet |
+| `/inbox` | Received pulses (scene-styled) |
 | `/settings` | Account + log out |
 
 ## Docs
@@ -97,6 +117,12 @@ Open [http://localhost:3000](http://localhost:3000).
 - [KNOWN_ISSUES.md](./KNOWN_ISSUES.md)
 - [TEST_CHECKLIST.md](./TEST_CHECKLIST.md)
 - [HANDOFF.md](./HANDOFF.md)
+- [docs/design/THREAD_GARDEN_HANDOFF.md](./docs/design/THREAD_GARDEN_HANDOFF.md)
+- [docs/design/ARCHIVED_SCENES.md](./docs/design/ARCHIVED_SCENES.md)
+
+## Local-only (not in repo)
+
+- `/v0-design-reference/` — v0 design export; gitignored. Do not commit.
 
 ## Legacy
 
