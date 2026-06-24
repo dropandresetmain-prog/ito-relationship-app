@@ -1,10 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Thinking of You",
-  description: "A quiet space for long-distance couples",
+  title: "Ito",
+  description:
+    "A mobile-first presence app for private relationship threads and gentle pulses.",
+  applicationName: "Ito",
+  appleWebApp: {
+    capable: true,
+    title: "Ito",
+    statusBarStyle: "default",
+  },
 };
 
 export const viewport: Viewport = {
@@ -22,13 +28,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="tg-viewport antialiased">
-        <Script
-          src="https://telegram.org/js/telegram-web-app.js"
-          strategy="beforeInteractive"
-        />
-        {children}
-      </body>
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+      </head>
+      <body className="app-viewport antialiased">{children}</body>
     </html>
   );
 }

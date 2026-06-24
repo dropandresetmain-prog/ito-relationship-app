@@ -1,91 +1,53 @@
-"use client";
+import Link from "next/link";
+import { AppShell } from "@/components/AppShell";
+import { ThreadCard } from "@/components/ThreadCard";
+import { TreeIdentityCard } from "@/components/TreeIdentityCard";
+import {
+  mockGentleReminders,
+  mockThreads,
+  mockTreeIdentity,
+} from "@/lib/mock/data";
 
-import { useEffect, useState } from "react";
-import { HomeScreen } from "@/components/HomeScreen";
-import { PairingScreen } from "@/components/PairingScreen";
-import { useTelegramApp, type MeResponse } from "@/lib/hooks/use-telegram-app";
-
-export default function AppPage() {
-  const { ready, apiFetch } = useTelegramApp();
-  const [me, setMe] = useState<MeResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!ready) return;
-
-    let cancelled = false;
-
-    async function load() {
-      try {
-        const data = (await apiFetch("/api/me")) as MeResponse;
-        if (!cancelled) setMe(data);
-      } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load");
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [ready, apiFetch]);
-
-  if (loading) {
-    return (
-      <div className="flex min-h-[100dvh] items-center justify-center">
-        <p className="text-sm text-warm-900/50">Loading…</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-4 px-6">
-        <p className="text-center text-sm text-red-500">{error}</p>
-        {process.env.NODE_ENV !== "production" && (
-          <p className="text-center text-xs text-warm-900/40">
-            Dev tip: set DEV_TELEGRAM_USER_ID in .env.local
-          </p>
-        )}
-      </div>
-    );
-  }
-
-  if (!me) return null;
-
-  const { user, coupleStatus, isDevFallback } = me;
-
-  if (!coupleStatus.couple) {
-    return (
-      <div className="flex min-h-[100dvh] flex-col items-center justify-center">
-        {isDevFallback && (
-          <p className="mb-4 rounded-full bg-amber-100 px-3 py-1 text-xs text-amber-700">
-            Dev mode — mock Telegram user
-          </p>
-        )}
-        <PairingScreen />
-      </div>
-    );
-  }
+export default function HomePage() {
+  const reminder = mockGentleReminders[0];
+  const featuredThreads = mockThreads.slice(0, 2);
 
   return (
-    <>
-      {isDevFallback && (
-        <div className="absolute left-0 right-0 top-0 z-10 bg-amber-100 px-3 py-1 text-center text-xs text-amber-700">
-          Dev mode — mock Telegram user
-        </div>
-      )}
-      <HomeScreen
-        user={user}
-        partner={coupleStatus.partner}
-        isPaired={coupleStatus.isPaired}
-        inviteCode={coupleStatus.couple.invite_code}
-      />
-    </>
+    <AppShell>
+      <div className="flex flex-col gap-6">
+        <TreeIdentityCard identity={mockTreeIdentity} />
+
+        <section
+          className="rounded-2xl border border-thread-100 bg-thread-50/50 px-4 py-3"
+          aria-label="Gentle reminder"
+        >
+          <p className="text-sm text-warm-900/70">{reminder}</p>
+          <p className="mt-1 text-xs text-warm-900/45">
+            A small pulse can mean a lot.
+          </p>
+        </section>
+
+        <section>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-warm-900">Your threads</h2>
+            <Link href="/threads" className="text-xs font-medium text-thread-600">
+              See all
+            </Link>
+          </div>
+          <div className="flex flex-col gap-3">
+            {featuredThreads.map((thread) => (
+              <ThreadCard key={thread.id} thread={thread} />
+            ))}
+          </div>
+        </section>
+
+        <Link
+          href="/threads/new"
+          className="rounded-xl bg-thread-600 py-3.5 text-center text-sm font-medium text-white transition active:scale-[0.98]"
+        >
+          Tie a thread
+        </Link>
+      </div>
+    </AppShell>
   );
 }

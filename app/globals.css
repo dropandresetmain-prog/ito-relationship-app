@@ -18,8 +18,15 @@ body {
   overflow-x: hidden;
 }
 
-/* Telegram safe area padding */
-body.tg-viewport {
+.app-viewport {
   padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }

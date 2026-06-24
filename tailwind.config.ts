@@ -9,14 +9,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        blush: {
-          50: "#fff5f7",
-          100: "#ffe4ea",
-          200: "#ffc9d6",
-          300: "#ff9eb5",
-          400: "#ff6b8f",
-          500: "#f43f6e",
-          600: "#e11d5a",
+        thread: {
+          50: "#fef2f2",
+          100: "#fee2e2",
+          200: "#fecaca",
+          300: "#fca5a5",
+          400: "#f87171",
+          500: "#ef4444",
+          600: "#dc2626",
+          700: "#b91c1c",
         },
         warm: {
           50: "#fdf8f6",

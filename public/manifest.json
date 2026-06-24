@@ -1,0 +1,11 @@
+{
+  "name": "Ito",
+  "short_name": "Ito",
+  "description": "Private relationship threads and gentle pulses.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fdf8f6",
+  "theme_color": "#b91c1c",
+  "orientation": "portrait-primary",
+  "lang": "en"
+}

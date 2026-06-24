@@ -1,48 +1,46 @@
 # Project File Map
 
 ```
-ldr-couples-app/
+ito-relationship-app/
 ├── app/
-│   ├── api/
-│   │   ├── me/route.ts              # POST: verify identity, upsert user, couple status
-│   │   ├── couples/
-│   │   │   ├── create/route.ts      # POST: create invite code
-│   │   │   └── join/route.ts        # POST: join with invite code
-│   │   └── touches/
-│   │       └── send/route.ts        # POST: send touch + Telegram notification
-│   ├── globals.css                  # Tailwind + base styles
-│   ├── layout.tsx                   # Root layout, Telegram WebApp script
-│   └── page.tsx                     # Main app entry (pairing or home)
+│   ├── layout.tsx                 # Root layout, PWA metadata
+│   ├── globals.css                # Tailwind + safe-area utilities
+│   ├── page.tsx                   # Home (/)
+│   ├── onboarding/page.tsx
+│   ├── threads/
+│   │   ├── page.tsx               # Thread list
+│   │   └── new/page.tsx           # Tie a thread (mock)
+│   ├── invite/[code]/page.tsx     # Accept invite (mock)
+│   ├── thread/[id]/page.tsx       # Pulse screen (mock)
+│   ├── inbox/page.tsx
+│   └── settings/page.tsx
 ├── components/
-│   ├── HomeScreen.tsx               # Giant button + placeholder footer actions
-│   ├── PairingScreen.tsx            # Create/join couple flow
-│   ├── PlaceholderAction.tsx        # Locked Note / Locked Photo placeholders
-│   └── ThinkingButton.tsx           # Circular "Thinking of you" button
+│   ├── AppShell.tsx               # Page chrome + optional back link
+│   ├── BottomNav.tsx              # Main tab navigation
+│   ├── TreeIdentityCard.tsx
+│   ├── ThreadCard.tsx
+│   ├── PulseButton.tsx
+│   ├── MessageCategoryPicker.tsx
+│   ├── NotificationInboxItem.tsx
+│   └── ReactionPicker.tsx
 ├── lib/
-│   ├── couples/index.ts             # User upsert, couple create/join/status
-│   ├── hooks/use-telegram-app.ts    # Client hook: initData, apiFetch
-│   ├── supabase/server.ts           # Service-role Supabase client
-│   ├── telegram/
-│   │   ├── send-message.ts          # Telegram Bot API sendMessage
-│   │   └── verify-init-data.ts      # initData HMAC verification + dev fallback
-│   └── touches/index.ts             # Store touch + notify partner
-├── supabase/
-│   └── migrations/
-│       └── 20250623000000_milestone1_schema.sql
-├── .env.example
+│   ├── types.ts                   # Shared TypeScript types
+│   ├── labels.ts                  # UI label maps
+│   └── mock/data.ts               # Mock threads, inbox, identity
+├── public/
+│   └── manifest.json              # PWA manifest (no service worker yet)
+├── supabase/migrations/legacy/    # Archived prototype SQL — not Ito schema
+├── ARCHITECTURE.md
 ├── README.md
-├── PROJECT_FILE_MAP.md
-├── TEST_CHECKLIST.md
 ├── KNOWN_ISSUES.md
+├── TEST_CHECKLIST.md
 └── HANDOFF.md
 ```
 
-## Data flow
+## Data flow (today)
 
 ```
-Telegram Mini App (client)
-  → initData in POST body
-  → API route verifies initData
-  → service-role Supabase writes
-  → (touches) Telegram Bot API notify partner
+Page → mock data (lib/mock/data.ts) → presentational components
 ```
+
+No API routes. No Supabase client.
