@@ -1,6 +1,7 @@
 "use client";
 
 import type { Point, SceneConnection } from "@/lib/scene/types";
+import { iconForRelationshipMode } from "@/lib/scene/map-threads";
 import { threadPath } from "@/lib/scene/thread-path";
 import { cn } from "@/lib/utils";
 
@@ -86,7 +87,7 @@ export function ThreadLayer({
       </svg>
 
       {connections.map((c) => {
-        const Icon = c.icon;
+        const Icon = iconForRelationshipMode(c.relationshipMode);
         const selected = selectedId === c.id;
         const arrived = arrivedId === c.id;
         return (

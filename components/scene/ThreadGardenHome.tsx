@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { SceneConnection, TimeOfDay } from "@/lib/scene/types";
 import { THREAD_GARDEN } from "@/lib/scene/thread-garden";
+import { iconForRelationshipMode } from "@/lib/scene/map-threads";
 import { isDimScene, sceneHeroTextClass } from "@/lib/scene/scene-theme";
 import { itoButtonPrimaryClass } from "@/lib/ito-ui";
 import { cn } from "@/lib/utils";
@@ -85,7 +86,7 @@ function HomeSheet({
       <p className="mb-3 text-xs text-muted-foreground">Tap a thread to send a pulse.</p>
       <div className="flex items-stretch gap-2">
         {connections.map((c) => {
-          const Icon = c.icon;
+          const Icon = iconForRelationshipMode(c.relationshipMode);
           return (
             <button
               key={c.id}

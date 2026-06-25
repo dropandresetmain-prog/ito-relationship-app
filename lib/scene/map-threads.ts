@@ -80,8 +80,8 @@ export function mapThreadsToConnections(
     id: thread.id,
     name: thread.title,
     mode: relationModeFor(thread.relationshipMode),
+    relationshipMode: thread.relationshipMode,
     initial: thread.title.charAt(0).toUpperCase() || "?",
-    icon: iconForRelationshipMode(thread.relationshipMode),
     knot: knotSlots[index],
     lastPulse:
       thread.lastPulseAt != null ? `Last pulse ${thread.lastPulseAt.toLowerCase()}` : "Quiet for now",
