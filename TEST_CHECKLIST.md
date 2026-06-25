@@ -1,6 +1,6 @@
-# Manual Test Checklist — Ito M1 + M1.5 + M1.6
+# Manual Test Checklist — Ito M1 + M1.5 + M1.6 + M1.7
 
-**Target:** `main` or hotfix preview on Vercel
+**Target:** `feat/m1.7-core-loop-glow-reveal` or `main` on Vercel
 
 ## Prerequisites
 
@@ -10,6 +10,33 @@
 - [ ] Supabase Auth: Email enabled; redirect URLs include `/auth/callback` for localhost and Vercel
 - [ ] `npm run build` and `npm run lint` pass
 - [ ] `tailwind.config.ts` includes `./lib/**` in `content` (so `lib/ito-ui.ts` button classes are not purged)
+
+## M1.7 — core loop + Home glow reveal
+
+Two-account flow (local or production):
+
+- [ ] Account A logs in
+- [ ] Account A creates thread at `/threads/new`
+- [ ] Account B logs in (incognito / second profile)
+- [ ] Account B accepts invite
+- [ ] Account A sends default pulse from `/thread/[id]`
+- [ ] Account B opens `/` — sees glow on thread charm + scene overlay “[Sender] is thinking of you.”
+- [ ] Account B bottom sheet shows reveal (not generic home sheet) with “Send a pulse back”
+- [ ] Account B taps pulse back → `/thread/[id]?send=1` opens composer
+- [ ] Account B sends pulse back
+- [ ] Account A opens `/` — sees received glow/reveal for B’s pulse
+- [ ] `/`, `/thread/[id]`, `/inbox`, `/threads/new` do not 500
+- [ ] No server/client serialization errors in console
+- [ ] No RLS errors on pulse send
+- [ ] Home reveal text readable on mobile (375px) including evening scene
+- [ ] Pulse action clear: soft glow CTA + “tap thread charm” hint on Living Tree
+- [ ] Bottom nav does not cover main CTA in bottom sheet
+
+### Living Tree send UX (M1.7)
+
+- [ ] “Send a gentle pulse” uses soft glow button (not solid red block)
+- [ ] Tapping thread charm opens pulse composer when thread is active
+- [ ] Received pulse on thread shows reveal sheet before send options
 
 ## Mobile QA (375px viewport) — hotfix
 

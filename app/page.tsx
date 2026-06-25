@@ -4,13 +4,14 @@ import { mapThreadsToConnections } from "@/lib/scene/map-threads";
 import { THREAD_GARDEN } from "@/lib/scene/thread-garden";
 import { getTimeOfDay } from "@/lib/scene/time-of-day";
 import { requireProfile } from "@/lib/auth/session";
-import { getInboxPulses, getUserThreads } from "@/lib/threads/queries";
+import { getInboxPulses, getUserThreads, pickLatestReceivedPulse } from "@/lib/threads/queries";
 
 export default async function HomePage() {
   const { profile } = await requireProfile();
   const threads = await getUserThreads();
   const inbox = await getInboxPulses();
   const unreadCount = inbox.filter((item) => !item.read).length;
+  const receivedPulse = pickLatestReceivedPulse(inbox);
   const unreadThreadIds = new Set(
     inbox.filter((item) => !item.read).map((item) => item.threadId)
   );
@@ -35,6 +36,7 @@ export default async function HomePage() {
         time={time}
         unreadCount={unreadCount}
         profileName={profile.display_name}
+        receivedPulse={receivedPulse}
       />
     </ScenePageLayout>
   );

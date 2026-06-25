@@ -1,6 +1,6 @@
 # Architecture — Ito
 
-**Current:** M1 backend + M1.5 scene UI + M1.6 hotfix on `main` (`9ada271` + thread RLS/contrast branch). Deployed on Vercel.
+**Current:** M1 backend + M1.5 scene UI + M1.6 hotfix + M1.7 core loop on `feat/m1.7-core-loop-glow-reveal`. Deployed on Vercel (`main` at `0ab61ae`).
 
 ## Product metaphors
 
@@ -108,12 +108,26 @@ Required in Supabase dashboard:
 
 ---
 
+## Core loop (M1.7)
+
+```
+Account A sends pulse → pulses row (recipient = B)
+  → B opens / → pickLatestReceivedPulse(inbox)
+  → Thread Garden: thread glow + scene overlay + reveal sheet
+  → B pulse back → sendPulse → A sees reveal on Home
+```
+
+Inbox remains secondary history. Emotional destination is Home / Thread Garden.
+
+---
+
 ## Scene / thread visual layer
 
 ```
 lib/scene/scene-theme.ts      → isDimScene (evening/night) text treatment
 lib/scene/map-threads.ts     → maps ThreadListItem[] to SceneConnection[] (knot slots)
-components/scene/ThreadLayer → SVG threads + charm buttons
+components/pulse/PulseReveal → received-pulse overlay + sheet reveal (serializable props)
+components/scene/ThreadLayer → SVG threads + charm buttons + arrived glow
 lib/scene/thread-path.ts     → curved path treeAnchor → knot
 ```
 

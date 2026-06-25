@@ -13,6 +13,14 @@ export const itoButtonSecondaryClass =
 export const itoButtonInlinePrimaryClass =
   "box-border flex min-h-11 flex-[2] items-center justify-center gap-2 rounded-full bg-[var(--thread)] px-4 py-3 text-sm font-semibold text-primary-foreground shadow-md transition-transform active:scale-[0.98] disabled:opacity-50 touch-manipulation appearance-none";
 
+/** Soft glow CTA — gentle thread pulse action without a solid red block. */
+export const itoButtonSoftGlowClass =
+  "box-border flex w-full min-h-12 items-center justify-center gap-2 rounded-full border-2 border-[var(--thread)]/45 bg-[var(--thread)]/12 px-5 py-3 text-sm font-semibold text-foreground shadow-[0_0_20px_oklch(0.68_0.21_30/0.25)] transition-all active:scale-[0.98] hover:border-[var(--thread)]/65 hover:bg-[var(--thread)]/18 disabled:opacity-50 touch-manipulation appearance-none animate-shimmer";
+
+/** Inline soft glow CTA for horizontal rows. */
+export const itoButtonInlineSoftGlowClass =
+  "box-border flex min-h-11 flex-[2] items-center justify-center gap-2 rounded-full border-2 border-[var(--thread)]/45 bg-[var(--thread)]/12 px-4 py-3 text-sm font-semibold text-foreground shadow-[0_0_16px_oklch(0.68_0.21_30/0.2)] transition-all active:scale-[0.98] hover:border-[var(--thread)]/65 hover:bg-[var(--thread)]/18 disabled:opacity-50 touch-manipulation appearance-none";
+
 /** Secondary CTA in a horizontal button row. */
 export const itoButtonInlineSecondaryClass =
   "box-border flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full border border-border bg-background/60 px-3 py-3 text-sm font-medium text-foreground transition-colors hover:border-[var(--thread)]/40 touch-manipulation appearance-none";

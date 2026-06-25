@@ -84,6 +84,16 @@ export interface InboxPulseItem {
   read: boolean;
 }
 
+/** Serializable received-pulse state for Home / Thread Garden glow reveal. */
+export interface ReceivedPulseReveal {
+  id: string;
+  threadId: string;
+  fromName: string;
+  body: string | null;
+  createdAt: string;
+  read: boolean;
+}
+
 export interface InvitePreview {
   thread_id: string;
   relationship_mode: RelationshipMode;

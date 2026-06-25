@@ -1,6 +1,6 @@
 # Project File Map
 
-**Updated for M1.6 on `main` (`9ada271` + hotfix branch)**
+**Updated for M1.7 on `feat/m1.7-core-loop-glow-reveal`**
 
 ```
 ito-relationship-app/
@@ -33,7 +33,8 @@ ito-relationship-app/
 │   │   ├── Bird.tsx                   # Tappable bird animation
 │   │   └── Particles.tsx              # Ambient motes
 │   ├── pulse/
-│   │   └── PulseComposer.tsx          # Category + note composer (sendPulse action)
+│   │   ├── PulseComposer.tsx          # Category + note composer (sendPulse action)
+│   │   └── PulseReveal.tsx            # Received-pulse glow reveal (Home + Living Tree)
 │   ├── inbox/
 │   │   ├── InboxPanel.tsx             # Real inbox list
 │   │   └── InboxScene.tsx             # Inbox over Thread Garden backdrop
@@ -53,7 +54,7 @@ ito-relationship-app/
 │   ├── profile/actions.ts             # saveProfile
 │   ├── threads/
 │   │   ├── actions.ts                 # createThread, acceptInvite, sendPulse
-│   │   └── queries.ts                 # getUserThreads, getThreadDetail, inbox
+│   │   └── queries.ts                 # getUserThreads, getThreadDetail, inbox, pickLatestReceivedPulse
 │   ├── scene/
 │   │   ├── thread-garden.ts           # Home scene config + charm slots
 │   │   ├── living-tree.ts             # Detail scene config
@@ -103,7 +104,9 @@ ito-relationship-app/
 ```
 Auth (Supabase) → profile row → thread create/join → pulse insert → inbox read
                          ↓
-              map-threads → SceneConnection[] → ThreadLayer charms
+              pickLatestReceivedPulse / pickReceivedPulseForThread
+                         ↓
+              map-threads → SceneConnection[] → ThreadLayer charms + PulseReveal
 ```
 
 All via anon key + RLS. Server Actions use server Supabase client with user session cookies. Scene UI receives real data from server components — no v0 mock arrays.

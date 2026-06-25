@@ -56,17 +56,18 @@ export function ThreadLayer({
         {connections.map((c) => {
           const d = threadPath(treeAnchor, c.knot);
           const active = selectedId === c.id || pulsingId === c.id;
+          const arrived = arrivedId === c.id || c.hasArrived;
           return (
             <g key={c.id}>
               <path
                 d={d}
                 fill="none"
                 stroke="var(--thread)"
-                strokeWidth={active ? 1.6 : 1}
+                strokeWidth={arrived ? 1.8 : active ? 1.6 : 1}
                 strokeLinecap="round"
                 vectorEffect="non-scaling-stroke"
-                opacity={selectedId && !active ? 0.35 : 0.85}
-                filter={active ? "url(#thread-soft-glow)" : undefined}
+                opacity={selectedId && !active && !arrived ? 0.35 : arrived ? 1 : 0.85}
+                filter={active || arrived ? "url(#thread-soft-glow)" : undefined}
               />
               <circle
                 cx={c.knot.x}
@@ -89,7 +90,7 @@ export function ThreadLayer({
       {connections.map((c) => {
         const Icon = iconForRelationshipMode(c.relationshipMode);
         const selected = selectedId === c.id;
-        const arrived = arrivedId === c.id;
+        const arrived = arrivedId === c.id || c.hasArrived;
         return (
           <button
             key={c.id}

@@ -6,10 +6,15 @@ import { LIVING_TREE } from "@/lib/scene/living-tree";
 import { getTimeOfDay } from "@/lib/scene/time-of-day";
 import { requireProfile } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
-import { getInboxPulses, getThreadDetail } from "@/lib/threads/queries";
+import {
+  getInboxPulses,
+  getThreadDetail,
+  pickReceivedPulseForThread,
+} from "@/lib/threads/queries";
 
 interface ThreadPageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ send?: string }>;
 }
 
 function formatRelativeTime(iso: string | null): string | null {
@@ -23,8 +28,9 @@ function formatRelativeTime(iso: string | null): string | null {
   return date.toLocaleDateString();
 }
 
-export default async function ThreadPage({ params }: ThreadPageProps) {
+export default async function ThreadPage({ params, searchParams }: ThreadPageProps) {
   const { id } = await params;
+  const { send } = await searchParams;
   const { profile } = await requireProfile();
   const detail = await getThreadDetail(id);
 
@@ -35,6 +41,7 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
   const { thread, otherMember, displayTitle } = detail;
   const inbox = await getInboxPulses();
   const unreadCount = inbox.filter((item) => !item.read).length;
+  const receivedPulse = pickReceivedPulseForThread(inbox, thread.id);
 
   const supabase = await createClient();
   const { data: lastPulse } = await supabase
@@ -77,6 +84,8 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
         time={time}
         unreadCount={unreadCount}
         isActive={thread.status === "active"}
+        receivedPulse={receivedPulse}
+        openSend={send === "1"}
       />
     </ScenePageLayout>
   );

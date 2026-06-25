@@ -1,6 +1,6 @@
 # Known Issues
 
-**Updated after M1.6 hotfix branch (`hotfix/thread-create-rls-contrast-db-audit`)**
+**Updated after M1.7 (`feat/m1.7-core-loop-glow-reveal`)**
 
 ## Fixed in M1.6 hotfix
 
@@ -8,6 +8,12 @@
 - **Evening scene text contrast** — dark `text-foreground` on orange evening backdrop; header, empty state, Living Tree back link unreadable. Fixed via `isDimScene` (evening + night) in `lib/scene/scene-theme.ts`.
 - **BottomNav on scene pages** — improved contrast with `variant="scene"` on `ScenePageLayout`.
 - **Legacy components** — removed in `9ada271` (`AppShell`, `ThreadPulseForm`, etc.)
+
+## M1.7 notes
+
+- **Received pulse reveal** shows latest unread or recent (7-day) pulse on Home and thread detail — not auto-dismissed after viewing
+- **Pulse back from Home** navigates to `/thread/[id]?send=1` to open composer directly
+- **Multiple threads with pulses** — Home reveal shows only the single latest relevant pulse; other threads still show charm glow dot
 
 ## M1 limitations (still open)
 
@@ -58,6 +64,6 @@ Apply in order:
 
 ## What not to do
 
-- Do not start M2 until M1.6 merged and production smoke test passes
+- Do not start M2 until M1.7 merged and two-account core loop smoke test passes
 - Do not reintroduce v0 mock data at runtime
 - Do not add usage/analytics tables for trivial UI events

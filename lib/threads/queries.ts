@@ -4,11 +4,48 @@ import { requireProfile } from "@/lib/auth/session";
 import type {
   InboxPulseItem,
   InvitePreview,
+  ReceivedPulseReveal,
   RelationshipMode,
   ThreadDetail,
   ThreadListItem,
   ThreadRow,
 } from "@/lib/types";
+
+const RECEIVED_PULSE_RECENT_MS = 7 * 24 * 60 * 60 * 1000;
+
+function toReceivedPulseReveal(item: InboxPulseItem): ReceivedPulseReveal {
+  return {
+    id: item.id,
+    threadId: item.threadId,
+    fromName: item.fromName,
+    body: item.body,
+    createdAt: item.createdAt,
+    read: item.read,
+  };
+}
+
+function isRelevantReceivedPulse(item: InboxPulseItem): boolean {
+  if (!item.read) return true;
+  return Date.now() - new Date(item.createdAt).getTime() < RECEIVED_PULSE_RECENT_MS;
+}
+
+export function pickLatestReceivedPulse(
+  items: InboxPulseItem[]
+): ReceivedPulseReveal | null {
+  const relevant = items.filter(isRelevantReceivedPulse);
+  if (!relevant.length) return null;
+  return toReceivedPulseReveal(relevant[0]);
+}
+
+export function pickReceivedPulseForThread(
+  items: InboxPulseItem[],
+  threadId: string
+): ReceivedPulseReveal | null {
+  const match = items.find(
+    (item) => item.threadId === threadId && isRelevantReceivedPulse(item)
+  );
+  return match ? toReceivedPulseReveal(match) : null;
+}
 
 function generateInviteCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";

@@ -1,8 +1,7 @@
-# Handoff — Ito (M1 + M1.5 + M1.6 hotfix)
+# Handoff — Ito (M1 + M1.5 + M1.6 + M1.7)
 
-**Branch:** `main` (after merge)  
-**Latest commit before M1.6 hotfix:** `9ada271` — *Fix mobile auth CTA and home scene layout*  
-**M1.6 hotfix branch:** `hotfix/thread-create-rls-contrast-db-audit`  
+**Branch:** `feat/m1.7-core-loop-glow-reveal` (from `main` at `0ab61ae`)  
+**Latest on main before M1.7:** `0ab61ae` — *Fix production crash: stop passing Lucide icons from server to client*  
 **Deployed:** Vercel (connected to GitHub `main`)
 
 ---
@@ -42,6 +41,14 @@
 - Auth CTA tap targets + Tailwind purge fix for `lib/ito-ui.ts`
 - Home scene layout collapse fix (`ScenePageLayout` absolute inset)
 
+### M1.7 — core loop + Home glow reveal
+
+- **Received pulse reveal** — Home (`/`) surfaces latest unread/recent received pulse via `pickLatestReceivedPulse()`; scene overlay + bottom sheet show “[Sender] is thinking of you.” with pulse-back CTA
+- **Thread detail reveal** — Living Tree shows same reveal when opening a thread with a received pulse (`pickReceivedPulseForThread()`)
+- **Gentler send UX** — soft glow CTA (`itoButtonSoftGlowClass`); thread charm tap opens composer; no giant red send button on relationship sheet
+- **No schema changes** — uses existing `pulses` + `opened_at` read state; no new DB writes for UI
+- **Serializable props only** — `ReceivedPulseReveal` type passed server → client; icons stay client-side
+
 ---
 
 ## Environment variables
@@ -67,8 +74,8 @@
 
 | Route | Scene / shell | Data source |
 |-------|---------------|-------------|
-| `/` | Thread Garden | `getUserThreads`, `getInboxPulses` |
-| `/thread/[id]` | Living Tree | `getThreadDetail`, `sendPulse` action |
+| `/` | Thread Garden | `getUserThreads`, `getInboxPulses`, `pickLatestReceivedPulse` |
+| `/thread/[id]` | Living Tree | `getThreadDetail`, `pickReceivedPulseForThread`, `sendPulse` action |
 | `/inbox` | Inbox scene | `getInboxPulses` |
 | `/auth` | Scenic auth card | Supabase Auth actions |
 | `/onboarding` | ItoPaperShell | `saveProfile` |
@@ -101,7 +108,7 @@ See [KNOWN_ISSUES.md](./KNOWN_ISSUES.md). Summary:
 
 ## Recommended next milestone — M2
 
-**Message bank seed + non-repeating category pulses** (after M1.6 merged + production smoke test)
+**Message bank seed + non-repeating category pulses** (after M1.7 merged + two-account production smoke test)
 
 See `docs/audits/DATABASE_USAGE_AUDIT.md` for persistence guidance.
 

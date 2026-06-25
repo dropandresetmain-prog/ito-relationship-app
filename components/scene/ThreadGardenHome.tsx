@@ -7,7 +7,9 @@ import { THREAD_GARDEN } from "@/lib/scene/thread-garden";
 import { iconForRelationshipMode } from "@/lib/scene/map-threads";
 import { isDimScene, sceneHeroTextClass } from "@/lib/scene/scene-theme";
 import { itoButtonPrimaryClass } from "@/lib/ito-ui";
+import type { ReceivedPulseReveal } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { PulseReveal } from "@/components/pulse/PulseReveal";
 import { BottomSheet } from "./BottomSheet";
 import { SceneInboxButton } from "./SceneInboxButton";
 import { SceneShell } from "./SceneShell";
@@ -18,6 +20,7 @@ interface ThreadGardenHomeProps {
   time: TimeOfDay;
   unreadCount: number;
   profileName: string;
+  receivedPulse: ReceivedPulseReveal | null;
 }
 
 export function ThreadGardenHome({
@@ -25,10 +28,12 @@ export function ThreadGardenHome({
   time,
   unreadCount,
   profileName,
+  receivedPulse,
 }: ThreadGardenHomeProps) {
   const router = useRouter();
   const hasThreads = connections.length > 0;
   const dimScene = isDimScene(time);
+  const showReveal = receivedPulse != null;
 
   return (
     <SceneShell
@@ -36,11 +41,17 @@ export function ThreadGardenHome({
       time={time}
       greeting={profileName ? `Welcome back, ${profileName.split(" ")[0]}` : undefined}
       headerRight={<SceneInboxButton unreadCount={unreadCount} />}
+      overlay={
+        showReveal ? (
+          <PulseReveal pulse={receivedPulse} variant="overlay" dimScene={dimScene} />
+        ) : null
+      }
     >
       {hasThreads ? (
         <ThreadLayer
           connections={connections}
           treeAnchor={THREAD_GARDEN.treeAnchor}
+          arrivedId={receivedPulse?.threadId ?? null}
           onSelect={(id) => router.push(`/thread/${id}`)}
         />
       ) : (
@@ -56,8 +67,13 @@ export function ThreadGardenHome({
         </div>
       )}
 
-      <BottomSheet sheetKey="home">
-        {hasThreads ? (
+      <BottomSheet sheetKey={showReveal ? `reveal-${receivedPulse.id}` : "home"}>
+        {showReveal ? (
+          <PulseReveal
+            pulse={receivedPulse}
+            onPulseBack={() => router.push(`/thread/${receivedPulse.threadId}?send=1`)}
+          />
+        ) : hasThreads ? (
           <HomeSheet connections={connections} onOpen={(id) => router.push(`/thread/${id}`)} />
         ) : (
           <EmptyHomeSheet />
@@ -83,7 +99,9 @@ function HomeSheet({
   return (
     <div>
       <p className="font-heading text-base leading-tight text-foreground">{label}</p>
-      <p className="mb-3 text-xs text-muted-foreground">Tap a thread to send a pulse.</p>
+      <p className="mb-3 text-xs text-muted-foreground">
+        Tap a thread charm to send a gentle pulse.
+      </p>
       <div className="flex items-stretch gap-2">
         {connections.map((c) => {
           const Icon = iconForRelationshipMode(c.relationshipMode);
